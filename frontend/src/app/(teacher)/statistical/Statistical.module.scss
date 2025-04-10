@@ -1,0 +1,28 @@
+.container {
+  background-color: var(--background);
+  height: 100%;
+  border-radius: 0.4rem;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+
+    &__title {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1.4;
+      letter-spacing: 0.5px;
+    }
+
+    :global(.ant-btn).container__header__btnSlider {
+      margin-right: 0.5rem;
+      background-color: var(--gray-200);
+      color: var(--gray-500);
+      outline: none;
+      border: none;
+      padding: 0.5rem;
+    }
+  }
+}

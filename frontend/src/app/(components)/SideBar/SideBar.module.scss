@@ -1,0 +1,31 @@
+body {
+  .SideBar {
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 100;
+
+    &__header {
+      color: var(--background);
+      font-size: 2rem;
+      margin: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      &__button {
+        background: transparent;
+        color: var(--background);
+        outline: none;
+        border: none;
+        margin-left: 0.3rem;
+
+        &:hover {
+          background: transparent !important;
+          color: var(--background) !important;
+        }
+      }
+    }
+  }
+}

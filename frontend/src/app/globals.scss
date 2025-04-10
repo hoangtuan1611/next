@@ -1,0 +1,79 @@
+@use 'tailwindcss';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  caret-color: transparent;
+}
+
+html,
+body,
+#root,
+.app {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--neutral-200);
+  color: var(--foreground);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+input,
+textarea {
+  caret-color: var(--foreground);
+}
+
+.ant-table-wrapper {
+  height: 100%;
+  .ant-spin-nested-loading {
+    height: 100%;
+    .ant-spin-container {
+      height: 100%;
+      .ant-table {
+        height: 90%;
+        .ant-table-container {
+          height: 100%;
+          .ant-table-content {
+            height: 100%;
+          }
+          .ant-table-body {
+            height: 90%;
+          }
+        }
+      }
+    }
+  }
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #212529;
+  --primary: #0070ff;
+  --secondary: #68bc34;
+  --gray-500: #6c757d;
+  --gray-400: #adb5bd;
+  --gray-200: #dee2e6;
+  --neutral-200: #ececec;
+  --green-600: #5baa54;
+  --red-500: #df4e42;
+}
+
+$background: var(--background);
+$foreground: var(--foreground);
+$primary: var(--primary);
+$secondary: var(--secondary);
+$gray-500: var(--gray-500);
+$gray-400: var(--gray-400);
+$gray-200: var(--gray-200);
+$neutral-200: var(--neutral-200);
+$green-600: var(--green-600);
+$red-500: var(--red-500);

@@ -1,0 +1,44 @@
+.container {
+  margin: 1rem;
+
+  &__layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+
+    &__item {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+
+      &__camera {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 130px;
+        width: 100%;
+        background-color: var(--foreground);
+        border-radius: 0.4rem;
+      }
+
+      &__info {
+        padding: 0.5rem;
+
+        &__state {
+          width: fit-content;
+          margin-top: 0.5rem;
+          padding: 0.2rem 1rem;
+          border-radius: 1rem;
+          color: var(--background);
+        }
+
+        &--online {
+          background-color: var(--green-600);
+        }
+
+        &--offline {
+          background-color: var(--red-500);
+        }
+      }
+    }
+  }
+}

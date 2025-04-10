@@ -1,0 +1,21 @@
+.toolBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  &__switch {
+    background-color: var(--gray-200);
+    border-radius: 0.4rem;
+
+    button {
+      border: none;
+      outline: none;
+      padding: 0.5rem;
+    }
+
+    &--inactive {
+      background-color: transparent !important;
+    }
+  }
+}

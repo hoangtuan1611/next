@@ -1,0 +1,32 @@
+.user {
+  position: absolute;
+  bottom: 0;
+  background-color: var(--gray-400);
+  color: var(--background);
+  margin: 1rem 0.5rem;
+  width: calc(100% - 1rem);
+  height: 4.125rem;
+  border-radius: 0.5rem;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  align-items: center;
+  padding: 0.5rem;
+  transition: all 0.3s ease-in-out;
+
+  &__open {
+    background-color: transparent;
+    display: block;
+    text-align: center;
+  }
+
+  :global(.ant-avatar).user__avatar {
+    background-color: var(--primary);
+    width: 3rem;
+    height: 3rem;
+  }
+
+  &__menuBtn {
+    width: 100%;
+    cursor: pointer;
+  }
+}
