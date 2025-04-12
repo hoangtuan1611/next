@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from 'react'
 import { Layout } from 'antd'
 import axios from 'axios'
-import UpdateClass from '@admin/schedule-managerment/UpdateClass'
-import { TimeTableItem } from '@admin/schedule-managerment/types'
+import UpdateClass from '@teacher/schedule/UpdateClass'
+import { TimeTableItem } from '@teacher/schedule/types'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 export default function Schedule() {

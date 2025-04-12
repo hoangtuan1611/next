@@ -5,10 +5,12 @@ export default function ViewCamera() {
   return (
     <>
       <div className={styles.container}></div>
-      <Button type="primary">Mở Cam</Button>
-      <Button type="primary" danger>
-        Tắt Cam
-      </Button>
+      <div className={styles.button}>
+        <Button type="primary">Mở Cam</Button>
+        <Button type="primary" danger>
+          Tắt Cam
+        </Button>
+      </div>
     </>
   )
 }

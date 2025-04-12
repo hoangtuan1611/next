@@ -4,6 +4,7 @@ import {
   VideoCameraAddOutlined,
   UserAddOutlined,
   SettingOutlined,
+  ScheduleOutlined,
 } from '@ant-design/icons'
 
 interface ItemProps {
@@ -39,8 +40,14 @@ export const items: Item[] = [
     path: getPath('/account-managerment'),
   }),
   getItem({
-    label: 'Cấu hình',
+    label: 'Thời khóa biểu',
     key: '3',
+    icon: React.createElement(ScheduleOutlined),
+    path: getPath('/schedule-managerment'),
+  }),
+  getItem({
+    label: 'Cấu hình',
+    key: '4',
     icon: React.createElement(SettingOutlined),
     path: getPath('/'),
   }),
