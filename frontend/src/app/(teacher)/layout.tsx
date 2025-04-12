@@ -1,11 +1,15 @@
+'use client'
+
+/// <reference types="react" />
+import * as React from 'react'
 import { items } from './SideBar.config'
 import SideBar from '@components/SideBar/SideBar'
 
 export default function ManagermentLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
     <div className="flex">
       <SideBar items={items} />

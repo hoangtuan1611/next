@@ -1,75 +1,83 @@
 'use client'
 
-import styles from './Login.module.scss'
-import { LockOutlined, UserOutlined } from '@ant-design/icons'
-import { Button, Checkbox, Form, Input } from 'antd'
-import { useEffect } from 'react'
-
-const clearAllStorage = () => {
-  localStorage.clear()
-  sessionStorage.clear()
-}
+import { LockOutlined, UserOutlined, EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
+import { Button, Form, Input } from 'antd'
+import Image from 'next/image'
 
 export default function Login() {
-  useEffect(() => {
-    clearAllStorage()
-  }, [])
-
   const onFinish = (values: any) => {
     console.log('Received values of form: ', values)
   }
 
   return (
-    <div className={styles.container}>
-      <h1 className={styles.container__title}>
-        Quản lý sinh viên trong phòng thực hành
-      </h1>
-      <Form
-        name="login"
-        initialValues={{ remember: true }}
-        style={{ maxWidth: 360 }}
-        onFinish={onFinish}
-      >
-        <Form.Item
-          name="username"
-          rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập!' }]}
-        >
-          <Input
-            suppressHydrationWarning
-            prefix={<UserOutlined />}
-            placeholder="Tên đăng nhập"
-          />
-        </Form.Item>
+    <div className="flex h-screen">
+      {/* Left side - Illustration */}
+      <div className="w-4/10 bg-white p-8 flex flex-col items-center justify-center relative">
+        <Image
+          src="/bg-login.svg"
+          alt="Login Illustration"
+          fill
+          className="object-contain"
+          priority
+        />
+      </div>
 
-        <Form.Item
-          name="password"
-          rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
-        >
-          <Input.Password
-            suppressHydrationWarning
-            prefix={<LockOutlined />}
-            type="password"
-            placeholder="Mật khẩu"
-          />
-        </Form.Item>
+      {/* Right side - Login Form */}
+      <div className="w-6/10 bg-white p-8 flex flex-col justify-center">
+        <div className="pr-[20%] ">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Đăng nhập</h2>
+          <p className="text-gray-600 mb-8">
+            Chào mừng bạn trở lại! Hãy nhập thông tin tài khoản để tiếp tục.
+          </p>
 
-        <div className="flex flex-col gap-2">
-          <Form.Item name="remember" valuePropName="checked" noStyle>
-            <Checkbox>Remember me</Checkbox>
-          </Form.Item>
-          <Form.Item>
-            <Button
-              suppressHydrationWarning
-              block
-              type="primary"
-              htmlType="submit"
+          <Form
+            name="login"
+            initialValues={{ remember: true }}
+            onFinish={onFinish}
+            layout="vertical"
+            size="large"
+          >
+            <Form.Item
+              label="Tên đăng nhập"
+              name="username"
+              rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập!' }]}
             >
-              Log in
-            </Button>
-            <a href="">Quên mật khẩu!</a>
-          </Form.Item>
+              <Input 
+                prefix={<UserOutlined className="text-gray-400" />}
+                placeholder="Nhập tên đăng nhập"
+              />
+            </Form.Item>
+
+            <Form.Item
+              label="Mật khẩu"
+              name="password"
+              rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+            >
+              <Input.Password
+                prefix={<LockOutlined className="text-gray-400" />}
+                placeholder="Nhập mật khẩu"
+                iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+              />
+            </Form.Item>
+
+            <div className="flex justify-between items-center mb-6">
+              <a className="text-sm text-gray-600 hover:text-green-600" href="#">
+                Ghi nhớ mật khẩu
+              </a>
+            </div>
+
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="w-full bg-green-600 hover:bg-green-700 border-none h-12 text-base font-medium"
+              >
+                Đăng nhập
+              </Button>
+            </Form.Item>
+          </Form>
         </div>
-      </Form>
+      </div>
     </div>
   )
 }

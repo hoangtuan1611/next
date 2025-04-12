@@ -3,3 +3,10 @@
   background-color: var(--foreground);
   border-radius: 0.5rem;
 }
+
+.button {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
