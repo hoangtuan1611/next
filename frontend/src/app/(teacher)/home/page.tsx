@@ -25,8 +25,10 @@ export default function Home() {
   useEffect(() => {
     const fetchStudentCount = async () => {
       try {
-        const response = await fetch("http://localhost:5000/student_count")
+        console.log("Fetching student count for camera:", selectedCamera) // Debug log
+        const response = await fetch(`http://localhost:5000/student_count?camera_id=${selectedCamera}`)
         const data = await response.json()
+        console.log("Student count data:", data) // Debug log
         setCurrentCount(data.count)
         
         // Tính tỷ lệ điểm danh
@@ -51,7 +53,7 @@ export default function Home() {
       const interval = setInterval(fetchStudentCount, 2000)
       return () => clearInterval(interval)
     }
-  }, [isStreaming, maxStudents])
+  }, [isStreaming, maxStudents, selectedCamera]) // Thêm selectedCamera vào dependencies
 
   useEffect(() => {
     const getTime = () => {
