@@ -25,50 +25,107 @@ export default function Schedule() {
     'Chủ nhật',
   ]
 
-  const timeTableApi = process.env.NEXT_PUBLIC_API_TIMETABLE
-  const teacherCode =
-    typeof window !== 'undefined'
-      ? (localStorage.getItem('TeacherCode') ?? '000.000.00000')
-      : '000.000.00000'
-  const teacherName =
-    typeof window !== 'undefined'
-      ? (localStorage.getItem('TeacherName') ?? 'Teacher')
-      : 'Teacher'
+  const teacherName = ''
 
-  const formatDate = (isoString: string): string => {
-    const date = new Date(isoString)
-    const day = String(date.getDate()).padStart(2, '0')
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const year = date.getFullYear()
-    return `${day}/${month}/${year}`
+  const handleCellClick = (item: TimeTableItem) => {
+    setSelectedItem(item)
+    setOpen(true)
   }
 
+  const [data, setData] = useState({})
+
   const fetchData = async () => {
-    try {
-      const result = await axios.get(`${timeTableApi}/${teacherCode}`)
-      if (result.data && result.data.length > 1) {
-        setStartDate(formatDate(result.data[0].schedule.startDay))
-        setEndDate(formatDate(result.data[0].schedule.endDay))
-        setWeekNum(result.data[0].schedule.weekNum)
-        setTimeTable(result.data)
-      } else {
-        console.log('Fail')
-        setTimeTable([])
-      }
-    } catch (error) {
-      console.log('Fail to load data')
-      setTimeTable([])
-    }
+    const result = await axios.get(
+      'http://localhost:5095/api/TeachingSchedule/8?startDate=2024-12-30&endDate=2025-01-05'
+    )
+    setData(result.data)
   }
 
   useEffect(() => {
     fetchData()
   }, [])
 
-  const handleCellClick = (item: TimeTableItem) => {
-    setSelectedItem(item)
-    setOpen(true)
+  const { schedule } = data || {}
+
+  if (!data.schedule) {
+    return <p>Đang tải dữ liệu...</p>
   }
+
+  const scheduleData = {
+    metadata: {
+      weekNumber: 8,
+      startDate: '30/12/2024',
+      endDate: '05/01/2025',
+      professorName: 'Đoàn Minh Khuê',
+    },
+    schedule: {
+      'Thứ 2': {
+        morning: [],
+        afternoon: [],
+        evening: [],
+      },
+      'Thứ 3': {
+        morning: [],
+        afternoon: [
+          {
+            subject: 'Lập trình python',
+            classCode: '24220CT3106D07',
+            className: 'CTK46-MMT, THK46SP',
+            period: '7->9',
+            periodBegin: 7,
+            periodEnd: 9,
+            timeBegin: '13:00',
+            timeEnd: '15:30',
+            taughtLessons: '0/30 tiết',
+            room: 'A8.5',
+            content: '',
+          },
+        ],
+        evening: [],
+      },
+      'Thứ 4': {
+        morning: [],
+        afternoon: [],
+        evening: [],
+      },
+      'Thứ 5': {
+        morning: [],
+        afternoon: [],
+        evening: [],
+      },
+      'Thứ 6': {
+        morning: [],
+        afternoon: [],
+        evening: [],
+      },
+      'Thứ 7': {
+        morning: [
+          {
+            subject: 'Lập trình Java',
+            classCode: '24220CT3105D03',
+            className: 'CTK46-PM',
+            period: '1->4',
+            periodBegin: 1,
+            periodEnd: 4,
+            timeBegin: '07:30',
+            timeEnd: '11:00',
+            taughtLessons: '0/30 tiết',
+            room: 'TV1',
+            content: '',
+          },
+        ],
+        afternoon: [],
+        evening: [],
+      },
+      'Chủ nhật': {
+        morning: [],
+        afternoon: [],
+        evening: [],
+      },
+    },
+  }
+
+  const timeMap = ['morning', 'afternoon', 'evening']
 
   return (
     <Layout style={{ flex: 1 }}>
@@ -98,7 +155,7 @@ export default function Schedule() {
                 <th className="w-[16%] border border-gray-100 bg-white py-3 text-center text-sm font-normal text-gray-500">
                   Thời gian
                 </th>
-                <th className="w-[28%]border border-gray-100 bg-white py-3 text-center text-sm font-normal text-gray-500">
+                <th className="w-[28%] border border-gray-100 bg-white py-3 text-center text-sm font-normal text-gray-500">
                   Sáng
                 </th>
                 <th className="w-[28%] border border-gray-100 bg-white py-3 text-center text-sm font-normal text-gray-500">
@@ -111,46 +168,42 @@ export default function Schedule() {
             </thead>
             <tbody>
               {days.map((day, index) => {
-                const scheduleForDay = timeTable.filter(
-                  (item) => item.dayOfWeek === index + 2
-                )
+                const scheduleForDay = schedule[day as keyof typeof schedule]
 
                 return (
                   <tr key={index}>
                     <td className="border border-gray-100 bg-gray-50 py-3 text-center text-sm font-medium">
                       {day}
                     </td>
-                    {[0, 1, 2].map((timeOfDay) => {
-                      const schedule = scheduleForDay.filter(
-                        (item) => item.timeOfDay === timeOfDay
-                      )
+                    {timeMap.map((time, timeIdx) => {
+                      const items = scheduleForDay[time]
 
                       return (
                         <td
-                          key={timeOfDay}
+                          key={timeIdx}
                           className="h-28 cursor-pointer border border-gray-100 p-2 align-top hover:bg-gray-50"
                           onClick={() =>
-                            schedule.length > 0 && handleCellClick(schedule[0])
+                            items.length > 0 && handleCellClick(items[0])
                           }
                         >
-                          {schedule.length > 0
-                            ? schedule.map((item, idx) => (
+                          {items.length > 0
+                            ? items.map((item, idx) => (
                                 <div key={idx} className="space-y-1">
                                   <p className="text-sm font-medium text-[#FF4D4F]">
-                                    {item.subject.subjectName}
+                                    {item.subject}
                                   </p>
                                   <p className="text-xs text-gray-500">
-                                    - Mã HP: {item.schedule.classId}
+                                    - Mã HP: {item.classCode}
                                   </p>
                                   <p className="text-xs text-[#1677FF]">
-                                    - Lớp: {item.schedule.className}
+                                    - Lớp: {item.className}
                                   </p>
                                   <p className="text-xs text-gray-500">
                                     - Tiết: {item.periodBegin} →{' '}
                                     {item.periodEnd}
                                   </p>
                                   <p className="text-xs text-gray-500">
-                                    - Đã dạy: {item.schedule.maxStudents} Tiết
+                                    - Đã dạy: {item.taughtLessons}
                                   </p>
                                   <p className="text-xs text-gray-500">
                                     - Phòng: {item.room}
@@ -169,14 +222,14 @@ export default function Schedule() {
         </div>
       </div>
 
-      {open && selectedItem && (
+      {/* {open && selectedItem && (
         <UpdateClass
           item={selectedItem}
           open={open}
           setOpen={setOpen}
           fetchData={fetchData}
         />
-      )}
+      )} */}
     </Layout>
   )
 }

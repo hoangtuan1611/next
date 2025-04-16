@@ -29,7 +29,7 @@ export const items: Item[] = [
     'Thống kê',
     '1',
     React.createElement(PieChartOutlined),
-    getPath('/statistical')
+    getPath('/home')
   ),
   getItem(
     'Camera',
@@ -41,7 +41,12 @@ export const items: Item[] = [
     'Lịch biểu',
     '3',
     React.createElement(ScheduleOutlined),
-    getPath('/')
+    getPath('/schedule')
   ),
-  getItem('Khóa học', '4', React.createElement(ProfileOutlined), getPath('/')),
+  getItem(
+    'Khóa học',
+    '4',
+    React.createElement(ProfileOutlined),
+    getPath('/history')
+  ),
 ]

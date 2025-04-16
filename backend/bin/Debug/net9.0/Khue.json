@@ -1,0 +1,115 @@
+{
+  "metadata": {
+    "week_number": 8,
+    "start_date": "30/12/2024",
+    "end_date": "05/01/2025",
+    "professor_name": "Đoàn Minh  Khuê"
+  },
+  "schedule": {
+    "Thứ 2": {
+      "morning": [
+        {
+          "subject": "Lập trình Java",
+          "class_code": "24220CT3105D01",
+          "class_name": "CTK46-PM",
+          "period": "1->4",
+          "period_begin": 1,
+          "period_end": 4,
+          "time_begin": "07:30",
+          "time_end": "11:00",
+          "taught_lessons": "0/30 tiết",
+          "room": "A27.08",
+          "content": ""
+        }
+      ],
+      "afternoon": [
+        {
+          "subject": "Lập trình python",
+          "class_code": "24220CT3106D01",
+          "class_name": "CTK46-MMT, CTK46-PM - nhom 1, THK46SP",
+          "period": "7->10",
+          "period_begin": 7,
+          "period_end": 10,
+          "time_begin": "13:00",
+          "time_end": "16:20",
+          "taught_lessons": "0/30 tiết",
+          "room": "A31.104",
+          "content": ""
+        }
+      ],
+      "evening": []
+    },
+    "Thứ 3": {
+      "morning": [],
+      "afternoon": [
+        {
+          "subject": "Lập trình python",
+          "class_code": "24220CT3106D07",
+          "class_name": "CTK46-MMT, THK46SP",
+          "period": "7->9",
+          "period_begin": 7,
+          "period_end": 9,
+          "time_begin": "13:00",
+          "time_end": "15:30",
+          "taught_lessons": "0/30 tiết",
+          "room": "TV1",
+          "content": ""
+        }
+      ],
+      "evening": []
+    },
+    "Thứ 4": {
+      "morning": [],
+      "afternoon": [],
+      "evening": []
+    },
+    "Thứ 5": {
+      "morning": [
+        {
+          "subject": "Lập trình python",
+          "class_code": "24220CT3106D01",
+          "class_name": "CTK46-MMT, CTK46-PM - nhom 1, THK46SP",
+          "period": "1->4",
+          "period_begin": 1,
+          "period_end": 4,
+          "time_begin": "07:30",
+          "time_end": "11:00",
+          "taught_lessons": "4/30 tiết",
+          "room": "A31.104",
+          "content": ""
+        }
+      ],
+      "afternoon": [],
+      "evening": []
+    },
+    "Thứ 6": {
+      "morning": [],
+      "afternoon": [],
+      "evening": []
+    },
+    "Thứ 7": {
+      "morning": [
+        {
+          "subject": "Lập trình Java",
+          "class_code": "24220CT3105D03",
+          "class_name": "CTK46-PM",
+          "period": "1->4",
+          "period_begin": 1,
+          "period_end": 4,
+          "time_begin": "07:30",
+          "time_end": "11:00",
+          "taught_lessons": "0/30 tiết",
+          "room": "A8.5",
+          "content": ""
+        }
+      ],
+      "afternoon": [],
+      "evening": []
+    },
+    "Chủ nhật": {
+      "morning": [],
+      "afternoon": [],
+      "evening": []
+    }
+  }
+}

@@ -2,65 +2,92 @@
 
 import React, { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
-import { List, DatePicker, Layout, Input, Button } from 'antd'
+import { List, DatePicker, Input, Button } from 'antd'
 import { Search, Plus, Monitor } from 'lucide-react'
 import axios from 'axios'
 import LineChartCustom from '@/app/(components)/LineChartCustom'
 import BarChartCustom from '@/app/(components)/BarChartCustom'
 import Image from 'next/image'
 
-interface LogData {
-  time: string
-  count: number
+interface DataProps {
+  id: number
+  classCode: string
+  className: string
+  subjectName: string
+  room: string
+  maxStudent: number
+  teacherCode: string
 }
-
-interface HistoryData {
-  date: string
-  logData: LogData[]
-}
-
-interface ChartData {
-  time: string
-  count: string
-}
-
-const dataChart: ChartData[] = [
-  { time: 'Buổi 1 (30/12/2025)', count: '40' },
-  { time: 'Buổi 2 (05/01/2025)', count: '45' },
-]
-
-const classList = [
-  {
-    id: 1,
-    name: 'Phát triển ứng dụng di động',
-    class: 'CTK46-PM',
-    room: 'A27.4',
-    students: 25
-  },
-  {
-    id: 2,
-    name: 'Lập trình Game',
-    class: 'CTK46-PM',
-    room: 'A27.4',
-    students: 30
-  }
-]
 
 export default function History() {
-  const [data, setData] = useState<HistoryData[]>([])
-  const [logData, setLogData] = useState<LogData[]>([])
-  const [selectedClass, setSelectedClass] = useState(classList[0])
+  const [data, setData] = useState<DataProps[]>([])
+  const [logDate, setLogDate] = useState([])
+  const [allLog, setAllLog] = useState([])
+  const [selectedClass, setSelectedClass] = useState<DataProps | undefined>()
+  const [selectedDate, setSelectedDate] = useState<string>(
+    dayjs().format('YYYY-MM-DD')
+  )
 
-  const handleDetail = (logData: LogData[]) => {
-    setLogData(logData)
+  const getAllSubject = async () => {
+    const result = await axios.get(
+      'http://localhost:5095/api/Subject/011.034.00027'
+    )
+    setData(result.data)
+
+    if (result.data.length > 0) {
+      setSelectedClass(result.data[0])
+    }
   }
+
+  const fetchLogByDate = async (subjectId: number, createDate: string) => {
+    try {
+      const result = await axios.get(
+        `http://localhost:5095/api/SubjectLog/session/${createDate}?subjectId=${subjectId}`
+      )
+
+      const lineChartData = result.data.map((item: any) => ({
+        createTime: item.createTime.slice(0, 5),
+        currentCount: item.currentCount,
+      }))
+
+      setLogDate(lineChartData)
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        setLogDate([])
+      }
+    }
+  }
+
+  const fetchAllLogBySubject = async (subjectId: number) => {
+    const result = await axios.get(
+      `http://localhost:5095/api/SubjectLog/${subjectId}`
+    )
+
+    const barChartData = result.data.map((item: any) => ({
+      time: `Buổi ${item.lessonNumber}`,
+      count: Number(item.avgCurrentCount.toFixed(2)),
+    }))
+
+    setAllLog(barChartData)
+  }
+
+  useEffect(() => {
+    getAllSubject()
+  }, [])
+
+  useEffect(() => {
+    if (selectedClass) {
+      fetchAllLogBySubject(selectedClass.id)
+      fetchLogByDate(selectedClass.id, selectedDate)
+    }
+  }, [selectedClass])
 
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Left Column - Class List */}
-      <div className="w-1/4 p-4 bg-white ">
+      <div className="w-1/4 bg-white p-4">
         <div className="mb-4">
-          <h2 className="text-xl font-bold mb-4">Danh sách lớp học</h2>
+          <h2 className="mb-4 text-xl font-bold">Danh sách lớp học</h2>
           <div className="relative mb-4">
             <Input
               placeholder="Tìm kiếm"
@@ -68,22 +95,27 @@ export default function History() {
               className="w-full"
             />
           </div>
-          <Button type="primary" className="w-full bg-green-600 hover:bg-green-700 flex items-center justify-center gap-2">
+          <Button
+            type="primary"
+            className="flex w-full items-center justify-center gap-2 bg-green-600 hover:bg-green-700"
+          >
             <Plus className="h-4 w-4" />
             Thêm mới lớp
           </Button>
         </div>
         <List
-          dataSource={classList}
-          renderItem={(item) => (
-            <div 
-              className={`p-3 mb-2 rounded-lg cursor-pointer flex items-center gap-3 ${
-                selectedClass.id === item.id ? 'bg-blue-50 text-green-600' : 'hover:bg-gray-50'
+          dataSource={data}
+          renderItem={(item: any) => (
+            <div
+              className={`mb-2 flex cursor-pointer items-center gap-3 rounded-lg p-3 ${
+                selectedClass && selectedClass.id === item.id
+                  ? 'bg-blue-50 text-green-600'
+                  : 'hover:bg-gray-50'
               }`}
               onClick={() => setSelectedClass(item)}
             >
               <Monitor className="h-5 w-5" />
-              <span>{item.name}</span>
+              <span>{item.subjectName}</span>
             </div>
           )}
         />
@@ -91,13 +123,12 @@ export default function History() {
 
       {/* Middle Column - History */}
       <div className="w-1/2 p-4">
-        <h2 className="text-xl font-bold mb-4">Lịch sử lớp học</h2>
-        <div className="bg-white rounded-lg p-4">
-          <div className="flex justify-between items-center mb-4">
+        <h2 className="mb-4 text-xl font-bold">Lịch sử lớp học</h2>
+        <div className="rounded-lg bg-white p-4">
+          <div className="mb-4 flex items-center justify-between">
             <div className="flex gap-2">
-              <div className="px-4 py-2 rounded bg-green-100 text-green-800">
-                Ngày 12/09/2025
-                <span className="ml-2 text-sm">Tiết 1-4</span>
+              <div className="rounded bg-green-100 px-4 py-2 text-green-800">
+                Ngày {selectedDate}
               </div>
             </div>
             <DatePicker
@@ -105,16 +136,25 @@ export default function History() {
               inputReadOnly={true}
               allowClear={false}
               defaultValue={dayjs()}
+              onChange={(date) => {
+                if (date && selectedClass) {
+                  const formatted = date.format('YYYY-MM-DD')
+                  setSelectedDate(formatted)
+                  fetchLogByDate(selectedClass.id, formatted)
+                }
+              }}
             />
           </div>
           <div className="mt-8">
-            <h3 className="text-lg font-semibold mb-4">Thống kê</h3>
-            <div className="h-64 mb-8">
-              <LineChartCustom data={logData} />
+            <h3 className="mb-4 text-lg font-semibold">Thống kê</h3>
+            <div className="mb-8 h-64">
+              <LineChartCustom data={logDate} />
             </div>
-            <h3 className="text-lg font-semibold mb-4">Thống kê điểm danh - CTK46-PM</h3>
+            <h3 className="mb-4 text-lg font-semibold">
+              Thống kê điểm danh - CTK46-PM
+            </h3>
             <div className="h-64">
-              <BarChartCustom data={dataChart} />
+              <BarChartCustom data={allLog} />
             </div>
           </div>
         </div>
@@ -122,10 +162,10 @@ export default function History() {
 
       {/* Right Column - Class Details */}
       <div className="w-1/4 p-4">
-        <h2 className="text-xl font-bold mb-4">Thông tin chi tiết lớp học</h2>
-        <div className="bg-white rounded-lg p-4">
-          <div className="flex justify-center mb-6">
-            <div className="w-32 h-32 relative">
+        <h2 className="mb-4 text-xl font-bold">Thông tin chi tiết lớp học</h2>
+        <div className="rounded-lg bg-white p-4">
+          <div className="mb-6 flex justify-center">
+            <div className="relative h-32 w-32">
               <Image
                 src="/class-icon.svg"
                 alt="Class Icon"
@@ -137,23 +177,25 @@ export default function History() {
           <div className="space-y-4">
             <div>
               <label className="text-gray-500">Tên:</label>
-              <p className="font-medium">{selectedClass.name}</p>
+              <p className="font-medium">{selectedClass?.subjectName}</p>
             </div>
             <div>
               <label className="text-gray-500">Lớp:</label>
-              <p className="font-medium">{selectedClass.class}</p>
+              <p className="font-medium">{selectedClass?.className}</p>
             </div>
             <div>
               <label className="text-gray-500">Phòng:</label>
-              <p className="font-medium">{selectedClass.room}</p>
+              <p className="font-medium">{selectedClass?.room}</p>
             </div>
             <div>
               <label className="text-gray-500">Sĩ số:</label>
-              <p className="font-medium">{selectedClass.students} sinh viên</p>
+              <p className="font-medium">
+                {selectedClass?.maxStudent} sinh viên
+              </p>
             </div>
           </div>
         </div>
       </div>
     </div>
   )
-} 
+}
