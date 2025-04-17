@@ -4,6 +4,7 @@ import { AntdRegistry } from '@ant-design/nextjs-registry'
 import { ConfigProvider, App } from 'antd'
 import theme from '@/theme/themeConfig'
 import '@ant-design/v5-patch-for-react-19'
+import { AuthProvider } from './(auth)/AuthConfig/AuthContext'
 
 export const metadata: Metadata = {
   title: 'Quản lý sinh viên',
@@ -23,7 +24,9 @@ export default function RootLayout({
       <body>
         <AntdRegistry>
           <ConfigProvider theme={theme}>
-            <App>{children}</App>
+            <App>
+              <AuthProvider>{children}</AuthProvider>
+            </App>
           </ConfigProvider>
         </AntdRegistry>
       </body>

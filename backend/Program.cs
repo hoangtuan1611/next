@@ -24,9 +24,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowFrontend",
-    policy => policy.AllowAnyOrigin()
+    policy => policy.WithOrigins("http://localhost:3000")
                     .AllowAnyMethod()
-                    .AllowAnyHeader());
+                    .AllowAnyHeader()
+                    .AllowCredentials());
 });
 
 builder.Services.AddAutoMapper(typeof(Program));
@@ -57,6 +58,16 @@ builder.Services.AddAuthentication(options =>
 .AddJwtBearer(options =>
 {
   var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+
+  options.Events = new JwtBearerEvents
+  {
+    OnMessageReceived = context =>
+    {
+      context.Token = context.Request.Cookies["token"];
+      return Task.CompletedTask;
+    }
+  };
+
   options.TokenValidationParameters = new TokenValidationParameters
   {
     ValidateIssuer = true,
@@ -81,5 +92,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowFrontend");
 app.MapControllers();
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.Run();

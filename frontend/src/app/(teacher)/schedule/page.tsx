@@ -6,14 +6,15 @@ import axios from 'axios'
 import UpdateClass from '@admin/schedule-managerment/UpdateClass'
 import { TimeTableItem } from '@admin/schedule-managerment/types'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useAuth } from '@/app/(auth)/AuthConfig/AuthContext'
+
+const scheduleApi = process.env.NEXT_PUBLIC_API_TEACHING_SCHEDULE
 
 export default function Schedule() {
-  const [weekNum, setWeekNum] = useState<number>(0)
-  const [startDate, setStartDate] = useState<string>('00/00/0000')
-  const [endDate, setEndDate] = useState<string>('00/00/0000')
-  const [timeTable, setTimeTable] = useState<TimeTableItem[]>([])
   const [open, setOpen] = useState<boolean>(false)
   const [selectedItem, setSelectedItem] = useState<TimeTableItem | undefined>()
+
+  const { user } = useAuth()
 
   const days = [
     'Thứ 2',
@@ -25,9 +26,8 @@ export default function Schedule() {
     'Chủ nhật',
   ]
 
-  const teacherName = ''
-
   const handleCellClick = (item: TimeTableItem) => {
+    console.log(item)
     setSelectedItem(item)
     setOpen(true)
   }
@@ -36,7 +36,7 @@ export default function Schedule() {
 
   const fetchData = async () => {
     const result = await axios.get(
-      'http://localhost:5095/api/TeachingSchedule/8?startDate=2024-12-30&endDate=2025-01-05'
+      `${scheduleApi}/8?startDate=2024-12-30&endDate=2025-01-05&teacherCode=${user?.code}`
     )
     setData(result.data)
   }
@@ -45,84 +45,10 @@ export default function Schedule() {
     fetchData()
   }, [])
 
-  const { schedule } = data || {}
+  const { metadata, schedule } = data || {}
 
   if (!data.schedule) {
     return <p>Đang tải dữ liệu...</p>
-  }
-
-  const scheduleData = {
-    metadata: {
-      weekNumber: 8,
-      startDate: '30/12/2024',
-      endDate: '05/01/2025',
-      professorName: 'Đoàn Minh Khuê',
-    },
-    schedule: {
-      'Thứ 2': {
-        morning: [],
-        afternoon: [],
-        evening: [],
-      },
-      'Thứ 3': {
-        morning: [],
-        afternoon: [
-          {
-            subject: 'Lập trình python',
-            classCode: '24220CT3106D07',
-            className: 'CTK46-MMT, THK46SP',
-            period: '7->9',
-            periodBegin: 7,
-            periodEnd: 9,
-            timeBegin: '13:00',
-            timeEnd: '15:30',
-            taughtLessons: '0/30 tiết',
-            room: 'A8.5',
-            content: '',
-          },
-        ],
-        evening: [],
-      },
-      'Thứ 4': {
-        morning: [],
-        afternoon: [],
-        evening: [],
-      },
-      'Thứ 5': {
-        morning: [],
-        afternoon: [],
-        evening: [],
-      },
-      'Thứ 6': {
-        morning: [],
-        afternoon: [],
-        evening: [],
-      },
-      'Thứ 7': {
-        morning: [
-          {
-            subject: 'Lập trình Java',
-            classCode: '24220CT3105D03',
-            className: 'CTK46-PM',
-            period: '1->4',
-            periodBegin: 1,
-            periodEnd: 4,
-            timeBegin: '07:30',
-            timeEnd: '11:00',
-            taughtLessons: '0/30 tiết',
-            room: 'TV1',
-            content: '',
-          },
-        ],
-        afternoon: [],
-        evening: [],
-      },
-      'Chủ nhật': {
-        morning: [],
-        afternoon: [],
-        evening: [],
-      },
-    },
   }
 
   const timeMap = ['morning', 'afternoon', 'evening']
@@ -143,7 +69,7 @@ export default function Schedule() {
           </div>
           <h1 className="text-sm">
             Thời khoá biểu giảng viên:{' '}
-            <span className="font-medium">{teacherName}</span>
+            <span className="font-medium">{metadata.professorName}</span>
           </h1>
         </div>
 
@@ -208,6 +134,9 @@ export default function Schedule() {
                                   <p className="text-xs text-gray-500">
                                     - Phòng: {item.room}
                                   </p>
+                                  <p className="text-xs text-gray-500">
+                                    - Số lượng: {item.maxStudent}
+                                  </p>
                                 </div>
                               ))
                             : null}
@@ -222,14 +151,14 @@ export default function Schedule() {
         </div>
       </div>
 
-      {/* {open && selectedItem && (
+      {open && selectedItem && (
         <UpdateClass
           item={selectedItem}
           open={open}
           setOpen={setOpen}
           fetchData={fetchData}
         />
-      )} */}
+      )}
     </Layout>
   )
 }

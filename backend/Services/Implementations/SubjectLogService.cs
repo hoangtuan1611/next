@@ -26,6 +26,7 @@ namespace backend.Services.Implementations
             LessonNumber = index + 1,
             TeachingSessionId = info.TeachingSessionId,
             TaughtLessons = info.TaughtLessons,
+            SessionDate = info.SessionDate,
             AvgCurrentCount = info.AvgCurrentCount
           });
 

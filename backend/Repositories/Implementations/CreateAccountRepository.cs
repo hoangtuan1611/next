@@ -29,6 +29,7 @@ namespace backend.Repositories.Implementations
       var codeExists = role switch
       {
         "teacher" => await _context.Teachers.AnyAsync(t => t.TeacherCode == code),
+        "admin" => true,
         _ => false
       };
 

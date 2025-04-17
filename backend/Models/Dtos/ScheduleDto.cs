@@ -13,6 +13,8 @@ namespace backend.Models.Dtos
     public string TaughtLessons { get; set; }
     public string Room { get; set; }
     public string Content { get; set; }
+    public int SubjectId { get; set; }
+    public int MaxStudent { get; set; }
   }
 
   public class MetadataDto

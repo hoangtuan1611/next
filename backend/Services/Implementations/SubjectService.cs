@@ -16,11 +16,16 @@ namespace backend.Services.Implementations
       _mapper = mapper;
     }
 
-    public async Task<List<SubjectDto>> GetSubjectsByTeacherCode(string teacherCode)
+    public async Task<List<SubjectDto>> GetSubjectsByTeacherCode(string teacherCode, int subjectId)
     {
-      var result = await _repository.GetAllSubjectsAsync(teacherCode);
+      var result = await _repository.GetAllSubjectsAsync(teacherCode, subjectId);
       var dto = _mapper.Map<List<SubjectDto>>(result);
       return dto;
+    }
+
+    public async Task<bool> UpdateMaxStudent(int subjectId, int maxStudentCount)
+    {
+      return await _repository.UpdateMaxStudentCountAsync(subjectId, maxStudentCount);
     }
   }
 }

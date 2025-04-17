@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import React from 'react'
 import {
   BarChart,
@@ -12,22 +13,38 @@ import {
 interface BarChartData {
   time: string
   count: string | number
+  sessionDate: string
 }
 
 interface BarChartCustomProps {
   data: BarChartData[]
+  setSelectedDate: React.Dispatch<React.SetStateAction<string>>
 }
 
-function BarChartCustom({ data }: BarChartCustomProps) {
+function BarChartCustom({ data, setSelectedDate }: BarChartCustomProps) {
+  const handleClick = (e: any) => {
+    if (e && e.activePayload) {
+      const clickedData = e.activePayload[0].payload
+      const formatted = dayjs(clickedData.sessionDate, 'DD/MM/YYYY').format(
+        'YYYY-MM-DD'
+      )
+      setSelectedDate(formatted)
+    }
+  }
+
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <BarChart data={data}>
+      <BarChart data={data} onClick={handleClick}>
         <XAxis dataKey={'time'} />
         <YAxis />
         <Tooltip />
-
-        <Legend formatter={() => ['Trung bình sô lượng sinh viên mỗi buổi']} />
-        <Bar dataKey="count" fill="#62B2FD" barSize={40} />
+        <Legend />
+        <Bar
+          name="Trung bình sô lượng sinh viên mỗi buổi"
+          dataKey="count"
+          fill="#62B2FD"
+          barSize={40}
+        />
       </BarChart>
     </ResponsiveContainer>
   )
