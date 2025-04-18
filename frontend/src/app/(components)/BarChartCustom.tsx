@@ -35,8 +35,19 @@ function BarChartCustom({ data, setSelectedDate }: BarChartCustomProps) {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <BarChart data={data} onClick={handleClick}>
-        <XAxis dataKey={'time'} />
-        <YAxis />
+        <XAxis
+          dataKey={'time'}
+          stroke="#999"
+          tick={{ fontSize: 12, fill: '#666' }}
+          axisLine={{ stroke: '#ccc' }}
+          tickLine={{ stroke: '#ccc' }}
+        />
+        <YAxis
+          stroke="#999"
+          tick={{ fontSize: 12, fill: '#666' }}
+          axisLine={{ stroke: '#ccc' }}
+          tickLine={{ stroke: '#ccc' }}
+        />
         <Tooltip />
         <Legend />
         <Bar

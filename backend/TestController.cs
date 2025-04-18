@@ -1,8 +1,10 @@
+using System.Text.RegularExpressions;
 using AutoMapper;
 using backend.Data;
 using backend.Models.Dtos;
 using backend.Models.Entities;
 using backend.Models.Request;
+using backend.Repositories.Interfaces;
 using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,31 +19,37 @@ namespace backend
     private readonly AppDbContext _context;
     private readonly IMapper _mapper;
     private readonly ITokenService _tokenService;
+    private readonly ISubjectLogService _subjectLogService;
+    private readonly ISubjectLogRepository _subjectLogRepository;
 
-    public TestController(AppDbContext context, IMapper mapper, ITokenService tokenService)
+    public TestController(
+      AppDbContext context,
+      IMapper mapper,
+      ITokenService tokenService,
+      ISubjectLogService subjectLogService,
+      ISubjectLogRepository subjectLogRepository)
     {
       _context = context;
       _mapper = mapper;
       _tokenService = tokenService;
+      _subjectLogService = subjectLogService;
+      _subjectLogRepository = subjectLogRepository;
+    }
+
+    public class SubjectLogDto
+    {
+      public int Id { get; set; }
+      public int CurrentCount { get; set; }
+      public int MaxStudent { get; set; }
+      public string CreateTime { get; set; }
+      public string ImgPath { get; set; }
     }
 
     [HttpGet("abc")]
-    public async Task<ActionResult<IEnumerable<dynamic>>> Hello(int weekNum, string teacherCode)
+    public async Task<ActionResult> Hello()
     {
-      var res = await _context.TeachingSessions
-        .Include(s => s.Subject)
-        .Include(s => s.TeachingWeek)
-        .Where(s =>
-          s.TeachingWeek.WeekNumber == weekNum &&
-          s.TeachingWeek.TeacherCode == teacherCode)
-        .ToListAsync();
-      var list = new List<ScheduleItemDto>();
-      foreach (var item in res)
-      {
-        var dto = _mapper.Map<ScheduleItemDto>(item);
-        list.Add(dto);
-      }
-      return Ok(list);
+      var result = await _subjectLogService.GetGroupedLogs();
+      return Ok(result);
     }
 
     [Authorize(Roles = "admin")]

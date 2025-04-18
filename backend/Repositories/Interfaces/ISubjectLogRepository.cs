@@ -7,5 +7,6 @@ namespace backend.Repositories.Interfaces
   {
     Task<IEnumerable<SubjectLog>> GetLogSessionAsync(DateOnly createDate, int subjectId);
     Task<IEnumerable<TeachingSessionInfo>> GetAllLogSessionAsync(int subjectId);
+    Task<IEnumerable<SubjectLogGroupResult>> GetGroupedLogsAsync();
   }
 }

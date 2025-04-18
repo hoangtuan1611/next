@@ -95,5 +95,45 @@ namespace backend.Repositories.Implementations
           ? startDate.AddDays(offset)
           : startDate;
     }
+
+    public async Task<IEnumerable<SubjectLogGroupResult>> GetGroupedLogsAsync()
+    {
+      var result = await _context.SubjectLogs
+        .Include(l => l.TeachingSession.Subject.Teacher)
+        .GroupBy(g => g.CreateDate)
+        .Select(s => new SubjectLogGroupResult
+        {
+          CreateDate = s.Key,
+          TeachingSession = s
+            .GroupBy(g => g.TeachingSessionId)
+            .Select(s => new SubjectLogGroupSummaryDto
+            {
+              TeachingSession = s.Key,
+              TeacherName = s.First().TeachingSession.Subject.Teacher.TeacherName,
+              SubjectName = s.First().TeachingSession.Subject.SubjectName,
+              ClassName = s.First().TeachingSession.Subject.ClassName,
+              MaxSudent = s.First().TeachingSession.Subject.MaxStudent,
+              FirstLog = s.ToList().OrderBy(o => o.CreateTime)
+                            .Select(s => new SubjectLogGroupItemDto
+                            {
+                              CreateTime = s.CreateTime,
+                              CurrentCount = s.CurrentCount,
+                              ImgPath = s.ImgPath
+                            })
+                            .FirstOrDefault(),
+              LastLog = s.ToList().OrderByDescending(o => o.CreateTime)
+                            .Select(s => new SubjectLogGroupItemDto
+                            {
+                              CreateTime = s.CreateTime,
+                              CurrentCount = s.CurrentCount,
+                              ImgPath = s.ImgPath
+                            })
+                            .FirstOrDefault()
+            }).ToList()
+        })
+        .ToListAsync();
+
+      return result;
+    }
   }
 }

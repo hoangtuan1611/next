@@ -45,5 +45,10 @@ namespace backend.Services.Implementations
       var result = await _repository.GetAllLogSessionAsync(subjectId);
       return result;
     }
+
+    public async Task<IEnumerable<SubjectLogGroupResult>> GetGroupedLogs()
+    {
+      return await _repository.GetGroupedLogsAsync();
+    }
   }
 }

@@ -7,5 +7,6 @@ namespace backend.Services.Interfaces
     Task<dynamic> GetAll(int subjectId);
     Task<IEnumerable<SubjectLogDto>> GetLogSessionBySubject(DateOnly createDate, int subjectId);
     Task<IEnumerable<TeachingSessionLogDto>> GetAllLogsBySubjectAsync(int subjectId);
+    Task<IEnumerable<SubjectLogGroupResult>> GetGroupedLogs();
   }
 }

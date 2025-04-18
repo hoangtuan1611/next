@@ -29,5 +29,13 @@ namespace backend.Controllers
       if (!result.Any()) return NotFound();
       return Ok(result);
     }
+
+    [HttpGet("Grouped")]
+    public async Task<ActionResult> GetAllLogGrouped()
+    {
+      var result = await _service.GetGroupedLogs();
+      if (!result.Any()) return NotFound();
+      return Ok(result);
+    }
   }
 }
