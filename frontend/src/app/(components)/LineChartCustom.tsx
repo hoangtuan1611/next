@@ -37,8 +37,19 @@ function LineChartCustom({ data }: LineChartCustomProps) {
     <>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} onClick={handleClick}>
-          <XAxis dataKey={'createTime'} />
-          <YAxis />
+          <XAxis
+            dataKey={'createTime'}
+            stroke="#999"
+            tick={{ fontSize: 12, fill: '#666' }}
+            axisLine={{ stroke: '#ccc' }}
+            tickLine={{ stroke: '#ccc' }}
+          />
+          <YAxis
+            stroke="#999"
+            tick={{ fontSize: 12, fill: '#666' }}
+            axisLine={{ stroke: '#ccc' }}
+            tickLine={{ stroke: '#ccc' }}
+          />
           <Tooltip />
           <Line
             name="Số lượng sinh viên"
