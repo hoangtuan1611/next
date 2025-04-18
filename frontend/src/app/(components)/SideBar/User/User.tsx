@@ -17,25 +17,26 @@ export default function User({ collapsed }: { collapsed: boolean }) {
   }, [collapsed])
 
   return (
-    <div className={clsx(styles.user, { [styles.user__open]: collapsed })}>
-      <div>
-        <Badge dot color="green">
-          <Avatar className={styles.user__avatar}>NT</Avatar>
-        </Badge>
-      </div>
-      <>
-        {!collapsed && showText && (
-          <>
-            <div>
-              <p>Nguyễn Trọng Hiếu</p>
-              <p>hieunt@dlu.edu.vn</p>
-            </div>
-            <div>
-              <button className={styles.user__menuBtn}>⋮</button>
-            </div>
-          </>
-        )}
-      </>
-    </div>
+    <div></div>
+    // <div className={clsx(styles.user, { [styles.user__open]: collapsed })}>
+    //   <div>
+    //     <Badge dot color="green">
+    //       <Avatar className={styles.user__avatar}>NT</Avatar>
+    //     </Badge>
+    //   </div>
+    //   <>
+    //     {!collapsed && showText && (
+    //       <>
+    //         <div>
+    //           <p>Nguyễn Trọng Hiếu</p>
+    //           <p>hieunt@dlu.edu.vn</p>
+    //         </div>
+    //         <div>
+    //           <button className={styles.user__menuBtn}>⋮</button>
+    //         </div>
+    //       </>
+    //     )}
+    //   </>
+    // </div>
   )
 }
