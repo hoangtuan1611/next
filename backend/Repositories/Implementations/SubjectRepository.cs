@@ -14,11 +14,27 @@ namespace backend.Repositories.Implementations
       _context = context;
     }
 
-    public async Task<List<Subject>> GetAllSubjectsAsync(string teacherCode)
+    public async Task<List<Subject>> GetAllSubjectsAsync(string teacherCode, int subjectId)
     {
-      return await _context.Subjects
-        .Where(s => s.TeacherCode == teacherCode)
-        .ToListAsync();
+      var query = _context.Subjects.AsQueryable();
+      if (!string.IsNullOrEmpty(teacherCode))
+      {
+        query = query.Where(s => s.TeacherCode == teacherCode);
+      }
+      if (subjectId != 0)
+      {
+        query = query.Where(s => s.id == subjectId);
+      }
+      return await query.ToListAsync();
+    }
+
+    public async Task<bool> UpdateMaxStudentCountAsync(int subjectId, int maxStudentCount)
+    {
+      var result = await _context.Subjects.FirstOrDefaultAsync(s => s.id == subjectId);
+      if (result == null) return false;
+      result.MaxStudent = maxStudentCount;
+      await _context.SaveChangesAsync();
+      return true;
     }
   }
 }

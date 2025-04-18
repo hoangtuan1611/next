@@ -1,9 +1,9 @@
 -- SELECT* FROM Teachers
 -- SELECT* FROM Users
 -- SELECT* FROM Subjects
--- SELECT* FROM TeachingSessions
--- SELECT* FROM TeachingWeeks
--- SELECT* FROM SubjectLogs
+SELECT* FROM TeachingSessions
+SELECT* FROM TeachingWeeks
+SELECT* FROM SubjectLogs
 
 -- INSERT INTO Teachers (TeacherCode, TeacherName) VALUES
 -- ('011.034.00010', N'Nguyễn Thị Lương'),

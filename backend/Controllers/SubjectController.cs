@@ -15,12 +15,24 @@ namespace backend.Controllers
       _service = service;
     }
 
-    [HttpGet("{teacherCode}")]
-    public async Task<ActionResult<Subject>> GetAllSubject(string teacherCode)
+    [HttpGet]
+    public async Task<ActionResult<Subject>> GetAllSubject([FromQuery] string teacherCode, [FromQuery] int subjectId)
     {
-      var result = await _service.GetSubjectsByTeacherCode(teacherCode);
-      if (result == null) return NotFound();
+      var result = await _service.GetSubjectsByTeacherCode(teacherCode, subjectId);
+      if (result == null || !result.Any()) return NotFound();
       return Ok(result);
+    }
+
+    [HttpPatch("{subjectId}")]
+    public async Task<ActionResult> UpdateMaxStudentCount(int subjectId, [FromQuery] int maxStudentCount)
+    {
+      if (maxStudentCount <= 0)
+      {
+        return BadRequest("MaxStudent is required and must be greater than 0!");
+      }
+      var result = await _service.UpdateMaxStudent(subjectId, maxStudentCount);
+      if (!result) return NotFound();
+      return Ok("Subject has been updated");
     }
   }
 }

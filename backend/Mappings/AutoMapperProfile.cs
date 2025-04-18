@@ -13,6 +13,7 @@ namespace backend.Mappings
             .ForMember(dest => dest.ClassCode, opt => opt.MapFrom(src => src.Subject.ClassCode))
             .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.Subject.ClassName))
             .ForMember(dest => dest.Room, opt => opt.MapFrom(src => src.Subject.Room))
+            .ForMember(dest => dest.MaxStudent, opt => opt.MapFrom(src => src.Subject.MaxStudent))
             .ForMember(dest => dest.TimeBegin, opt => opt.MapFrom(src => src.TimeBegin.ToString(@"hh\:mm")))
             .ForMember(dest => dest.TimeEnd, opt => opt.MapFrom(src => src.TimeEnd.ToString(@"hh\:mm")));
 

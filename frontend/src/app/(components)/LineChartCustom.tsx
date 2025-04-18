@@ -28,6 +28,7 @@ function LineChartCustom({ data }: LineChartCustomProps) {
   const handleClick = (e: any) => {
     if (e && e.activePayload) {
       const clickedData = e.activePayload[0].payload
+      setSelectedImage(clickedData.imgPath)
       setVisible(true)
     }
   }
@@ -39,8 +40,13 @@ function LineChartCustom({ data }: LineChartCustomProps) {
           <XAxis dataKey={'createTime'} />
           <YAxis />
           <Tooltip />
-          <Line type="monotone" dataKey="currentCount" stroke="#8884d8" />
-          <Legend formatter={() => ['Số lượng sinh viên']} />
+          <Line
+            name="Số lượng sinh viên"
+            type="monotone"
+            dataKey="currentCount"
+            stroke="#8884d8"
+          />
+          <Legend />
         </LineChart>
       </ResponsiveContainer>
       <Image
@@ -51,9 +57,10 @@ function LineChartCustom({ data }: LineChartCustomProps) {
         src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png?x-oss-process=image/blur,r_50,s_50/quality,q_1/resize,m_mfit,h_200,w_200"
         preview={{
           visible,
-          src: '/data/logs/test.png',
+          src: `/${selectedImage}`,
           onVisibleChange: (value: boolean) => {
             setVisible(value)
+            console.log(`${selectedImage}`)
           },
         }}
       />

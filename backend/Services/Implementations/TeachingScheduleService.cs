@@ -16,10 +16,10 @@ namespace backend.Services.Implementations
       _mapper = mapper;
     }
 
-    public async Task<WeeklyScheduleDto> GetWeeklyScheduleAsync(int weekNum, DateTime startDate, DateTime endDate)
+    public async Task<WeeklyScheduleDto> GetWeeklyScheduleAsync(int weekNum, DateTime startDate, DateTime endDate, string teacherCode)
     {
-      var sessions = await _repository.GetSessionsByWeekAsync(weekNum);
-      var week = await _repository.GetTeachingWeekAsync(weekNum, startDate, endDate);
+      var sessions = await _repository.GetSessionsByWeekAsync(weekNum, teacherCode);
+      var week = await _repository.GetTeachingWeekAsync(weekNum, startDate, endDate, teacherCode);
       if (week == null) return null;
 
       var schedule = new Dictionary<string, DayScheduleDto>();

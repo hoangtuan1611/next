@@ -26,7 +26,9 @@ export default function ToolBar({
 }) {
   const [isOpen, setIsOpen] = useState<boolean>(false)
 
-  const handleOk = () => {}
+  const handleOk = async (formData: any) => {
+    // Handle form submission here
+  }
 
   const showModal = () => {
     setIsOpen(true)

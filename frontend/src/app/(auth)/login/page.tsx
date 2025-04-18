@@ -1,18 +1,66 @@
 'use client'
 
-import { LockOutlined, UserOutlined, EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
+import {
+  LockOutlined,
+  UserOutlined,
+  EyeInvisibleOutlined,
+  EyeTwoTone,
+} from '@ant-design/icons'
 import { Button, Form, Input } from 'antd'
+import axios from 'axios'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useAuth } from '../AuthConfig/AuthContext'
+
+const loginApi = process.env.NEXT_PUBLIC_API_LOGIN
+const clearTokenApi = process.env.NEXT_PUBLIC_API_CLEAR_TOKEN
 
 export default function Login() {
-  const onFinish = (values: any) => {
-    console.log('Received values of form: ', values)
+  const [loading, setLoading] = useState<boolean>(false)
+
+  const route = useRouter()
+  const { fetchUser } = useAuth()
+
+  const onFinish = async (values: any) => {
+    try {
+      setLoading(true)
+      const res = await axios.post(`${loginApi}`, values, {
+        withCredentials: true,
+      })
+
+      if (res.data) {
+        const user = await fetchUser()
+        let redirectPath = '/login'
+        switch (user?.role) {
+          case 'admin':
+            redirectPath = '/camera-managerment'
+            break
+          case 'teacher':
+            redirectPath = '/home'
+          default:
+            break
+        }
+        route.push(redirectPath)
+      }
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false)
+    }
   }
+
+  useEffect(() => {
+    axios.get(`${clearTokenApi}`, {
+      withCredentials: true,
+    })
+    localStorage.clear()
+  }, [])
 
   return (
     <div className="flex h-screen">
       {/* Left side - Illustration */}
-      <div className="w-4/10 bg-white p-8 flex flex-col items-center justify-center relative">
+      <div className="relative flex w-4/10 flex-col items-center justify-center bg-white p-8">
         <Image
           src="/bg-login.svg"
           alt="Login Illustration"
@@ -23,10 +71,10 @@ export default function Login() {
       </div>
 
       {/* Right side - Login Form */}
-      <div className="w-6/10 bg-white p-8 flex flex-col justify-center">
-        <div className="pr-[20%] ">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Đăng nhập</h2>
-          <p className="text-gray-600 mb-8">
+      <div className="flex w-6/10 flex-col justify-center bg-white p-8">
+        <div className="pr-[20%]">
+          <h2 className="mb-2 text-2xl font-bold text-gray-800">Đăng nhập</h2>
+          <p className="mb-8 text-gray-600">
             Chào mừng bạn trở lại! Hãy nhập thông tin tài khoản để tiếp tục.
           </p>
 
@@ -40,9 +88,11 @@ export default function Login() {
             <Form.Item
               label="Tên đăng nhập"
               name="username"
-              rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập!' }]}
+              rules={[
+                { required: true, message: 'Vui lòng nhập tên đăng nhập!' },
+              ]}
             >
-              <Input 
+              <Input
                 prefix={<UserOutlined className="text-gray-400" />}
                 placeholder="Nhập tên đăng nhập"
               />
@@ -56,21 +106,27 @@ export default function Login() {
               <Input.Password
                 prefix={<LockOutlined className="text-gray-400" />}
                 placeholder="Nhập mật khẩu"
-                iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+                iconRender={(visible) =>
+                  visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+                }
               />
             </Form.Item>
 
-            <div className="flex justify-between items-center mb-6">
-              <a className="text-sm text-gray-600 hover:text-green-600" href="#">
+            <div className="mb-6 flex items-center justify-between">
+              <a
+                className="text-sm text-gray-600 hover:text-green-600"
+                href="#"
+              >
                 Ghi nhớ mật khẩu
               </a>
             </div>
 
             <Form.Item>
               <Button
+                loading={loading}
                 type="primary"
                 htmlType="submit"
-                className="w-full bg-green-600 hover:bg-green-700 border-none h-12 text-base font-medium"
+                className="h-12 w-full border-none bg-green-600 text-base font-medium hover:bg-green-700"
               >
                 Đăng nhập
               </Button>

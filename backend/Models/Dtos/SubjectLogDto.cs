@@ -13,6 +13,7 @@ namespace backend.Models.Dtos
   {
     public int TeachingSessionId { get; set; }
     public string TaughtLessons { get; set; }
+    public string SessionDate { get; set; }
     public double AvgCurrentCount { get; set; }
   }
 
@@ -21,6 +22,7 @@ namespace backend.Models.Dtos
     public int LessonNumber { get; set; }
     public int TeachingSessionId { get; set; }
     public string TaughtLessons { get; set; }
+    public string SessionDate { get; set; }
     public double AvgCurrentCount { get; set; }
   }
 }

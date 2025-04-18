@@ -24,7 +24,7 @@ namespace backend.Services.Implementations
         return null;
       }
 
-      return _tokenService.GenerateToken(user.Username, user.Role);
+      return _tokenService.GenerateToken(user.Username, user.Role, user.Code);
     }
   }
 }

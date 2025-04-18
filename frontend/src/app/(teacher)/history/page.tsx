@@ -8,6 +8,7 @@ import axios from 'axios'
 import LineChartCustom from '@/app/(components)/LineChartCustom'
 import BarChartCustom from '@/app/(components)/BarChartCustom'
 import Image from 'next/image'
+import { useAuth } from '@/app/(auth)/AuthConfig/AuthContext'
 
 interface DataProps {
   id: number
@@ -19,19 +20,24 @@ interface DataProps {
   teacherCode: string
 }
 
+const subjectApi = process.env.NEXT_PUBLIC_API_SUBJECT
+const subjectLogApi = process.env.NEXT_PUBLIC_API_SUBJECT_LOG
+
 export default function History() {
   const [data, setData] = useState<DataProps[]>([])
+  const [filteredData, setFilteredData] = useState<DataProps[]>([])
   const [logDate, setLogDate] = useState([])
   const [allLog, setAllLog] = useState([])
   const [selectedClass, setSelectedClass] = useState<DataProps | undefined>()
   const [selectedDate, setSelectedDate] = useState<string>(
     dayjs().format('YYYY-MM-DD')
   )
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const { user } = useAuth()
 
   const getAllSubject = async () => {
-    const result = await axios.get(
-      'http://localhost:5095/api/Subject/011.034.00027'
-    )
+    const result = await axios.get(`${subjectApi}?teacherCode=${user?.code}`)
     setData(result.data)
 
     if (result.data.length > 0) {
@@ -42,12 +48,13 @@ export default function History() {
   const fetchLogByDate = async (subjectId: number, createDate: string) => {
     try {
       const result = await axios.get(
-        `http://localhost:5095/api/SubjectLog/session/${createDate}?subjectId=${subjectId}`
+        `${subjectLogApi}/session/${createDate}?subjectId=${subjectId}`
       )
 
       const lineChartData = result.data.map((item: any) => ({
         createTime: item.createTime.slice(0, 5),
         currentCount: item.currentCount,
+        imgPath: item.imgPath,
       }))
 
       setLogDate(lineChartData)
@@ -59,15 +66,13 @@ export default function History() {
   }
 
   const fetchAllLogBySubject = async (subjectId: number) => {
-    const result = await axios.get(
-      `http://localhost:5095/api/SubjectLog/${subjectId}`
-    )
+    const result = await axios.get(`${subjectLogApi}/${subjectId}`)
 
     const barChartData = result.data.map((item: any) => ({
       time: `Buổi ${item.lessonNumber}`,
       count: Number(item.avgCurrentCount.toFixed(2)),
+      sessionDate: item.sessionDate,
     }))
-
     setAllLog(barChartData)
   }
 
@@ -77,10 +82,18 @@ export default function History() {
 
   useEffect(() => {
     if (selectedClass) {
-      fetchAllLogBySubject(selectedClass.id)
       fetchLogByDate(selectedClass.id, selectedDate)
+      fetchAllLogBySubject(selectedClass.id)
     }
-  }, [selectedClass])
+  }, [selectedClass, selectedDate])
+
+  useEffect(() => {
+    const filteredData = () =>
+      data.filter((i) =>
+        i.subjectName.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    setFilteredData(filteredData())
+  }, [searchTerm, data])
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -93,6 +106,8 @@ export default function History() {
               placeholder="Tìm kiếm"
               prefix={<Search className="h-4 w-4 text-gray-400" />}
               className="w-full"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <Button
@@ -104,7 +119,7 @@ export default function History() {
           </Button>
         </div>
         <List
-          dataSource={data}
+          dataSource={filteredData}
           renderItem={(item: any) => (
             <div
               className={`mb-2 flex cursor-pointer items-center gap-3 rounded-lg p-3 ${
@@ -128,7 +143,7 @@ export default function History() {
           <div className="mb-4 flex items-center justify-between">
             <div className="flex gap-2">
               <div className="rounded bg-green-100 px-4 py-2 text-green-800">
-                Ngày {selectedDate}
+                Ngày {dayjs(selectedDate).format('DD-MM-YYYY')}
               </div>
             </div>
             <DatePicker
@@ -146,15 +161,15 @@ export default function History() {
             />
           </div>
           <div className="mt-8">
-            <h3 className="mb-4 text-lg font-semibold">Thống kê</h3>
+            <h3 className="mb-4 text-lg font-semibold">Thống kê theo ngày</h3>
             <div className="mb-8 h-64">
               <LineChartCustom data={logDate} />
             </div>
             <h3 className="mb-4 text-lg font-semibold">
-              Thống kê điểm danh - CTK46-PM
+              Thống kê điểm danh - {selectedClass?.className}
             </h3>
             <div className="h-64">
-              <BarChartCustom data={allLog} />
+              <BarChartCustom data={allLog} setSelectedDate={setSelectedDate} />
             </div>
           </div>
         </div>

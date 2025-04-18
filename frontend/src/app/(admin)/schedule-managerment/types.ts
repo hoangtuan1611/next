@@ -19,4 +19,4 @@ export interface TimeTableItem {
   room: string
   periodBegin: number
   periodEnd: number
-} 
+}

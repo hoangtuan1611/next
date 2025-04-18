@@ -1,5 +1,7 @@
 using AutoMapper;
 using backend.Data;
+using backend.Models.Dtos;
+using backend.Models.Entities;
 using backend.Models.Request;
 using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -23,19 +25,23 @@ namespace backend
       _tokenService = tokenService;
     }
 
-    [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    [HttpGet("abc")]
+    public async Task<ActionResult<IEnumerable<dynamic>>> Hello(int weekNum, string teacherCode)
     {
-      var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
-
-      if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
+      var res = await _context.TeachingSessions
+        .Include(s => s.Subject)
+        .Include(s => s.TeachingWeek)
+        .Where(s =>
+          s.TeachingWeek.WeekNumber == weekNum &&
+          s.TeachingWeek.TeacherCode == teacherCode)
+        .ToListAsync();
+      var list = new List<ScheduleItemDto>();
+      foreach (var item in res)
       {
-        return Unauthorized("Invalid credentials");
+        var dto = _mapper.Map<ScheduleItemDto>(item);
+        list.Add(dto);
       }
-
-      var token = _tokenService.GenerateToken(user.Username, user.Role);
-
-      return Ok(new { Token = token });
+      return Ok(list);
     }
 
     [Authorize(Roles = "admin")]
@@ -50,6 +56,13 @@ namespace backend
     public IActionResult TeacherOnly()
     {
       return Ok("Giáo viên có thể thấy.");
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<SubjectLog>> GetAllLog()
+    {
+      var result = await _context.SubjectLogs.ToListAsync();
+      return Ok(result);
     }
   }
 }
