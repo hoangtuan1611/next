@@ -1,6 +1,6 @@
--- SELECT* FROM Teachers
--- SELECT* FROM Users
--- SELECT* FROM Subjects
+    SELECT* FROM Teachers
+    SELECT* FROM Users
+    SELECT* FROM Subjects
 SELECT* FROM TeachingSessions
 SELECT* FROM TeachingWeeks
 SELECT* FROM SubjectLogs
