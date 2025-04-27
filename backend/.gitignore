@@ -1,4 +1,4 @@
-/backend/bin/
-/backend/obj/
+/bin/
+/obj/
 *.dll
 *.pdb

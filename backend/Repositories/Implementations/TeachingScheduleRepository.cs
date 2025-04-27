@@ -35,5 +35,10 @@ namespace backend.Repositories.Implementations
           w.EndDate == endDate &&
           w.TeacherCode == teacherCode);
     }
+
+    public async Task<Teacher> GetTeacherAsync(string teacherCode)
+    {
+      return await _context.Teachers.FindAsync(teacherCode);
+    }
   }
 }

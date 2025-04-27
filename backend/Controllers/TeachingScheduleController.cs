@@ -1,3 +1,4 @@
+using backend.Data;
 using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,10 +9,14 @@ namespace backend.Controllers
   public class TeachingScheduleController : ControllerBase
   {
     private readonly ITeachingScheduleService _service;
+    private readonly AppDbContext _context;
 
-    public TeachingScheduleController(ITeachingScheduleService service)
+    public TeachingScheduleController(
+      ITeachingScheduleService service,
+      AppDbContext context)
     {
       _service = service;
+      _context = context;
     }
 
     [HttpGet("{weekNum}")]
