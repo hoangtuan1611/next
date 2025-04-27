@@ -1,10 +1,11 @@
-import React, { use } from 'react'
+import React from 'react'
 import { Item } from '@components/SideBar/SideBar.types'
 import {
   VideoCameraAddOutlined,
-  UserAddOutlined,
+  UserOutlined,
   SettingOutlined,
   ScheduleOutlined,
+  PieChartOutlined,
 } from '@ant-design/icons'
 
 interface ItemProps {
@@ -34,9 +35,9 @@ export const items: Item[] = [
     path: getPath('/camera-managerment'),
   }),
   getItem({
-    label: 'Tài Khoản',
+    label: 'Quản lý tài khoản',
     key: '2',
-    icon: React.createElement(UserAddOutlined),
+    icon: React.createElement(UserOutlined),
     path: getPath('/account-managerment'),
   }),
   getItem({
@@ -46,8 +47,14 @@ export const items: Item[] = [
     path: getPath('/schedule-managerment'),
   }),
   getItem({
-    label: 'Cấu hình',
+    label: 'Thống kê',
     key: '4',
+    icon: React.createElement(PieChartOutlined),
+    path: getPath('/statistical-managerment'),
+  }),
+  getItem({
+    label: 'Cấu hình',
+    key: '5',
     icon: React.createElement(SettingOutlined),
     path: getPath('/'),
   }),

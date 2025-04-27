@@ -1,34 +1,46 @@
 'use client'
 
-import { Dispatch, SetStateAction, useState } from 'react'
-import { Button } from 'antd'
-import {
-  MenuIcon,
-  LayoutDashboardIcon,
-  Trash2Icon,
-  CirclePlusIcon,
-} from 'lucide-react'
+import { useState } from 'react'
+import { Button, App } from 'antd'
+import { Trash2Icon, CirclePlusIcon } from 'lucide-react'
 import styles from './ToolBar.module.scss'
-import clsx from 'clsx'
 import AddAccount from '../AddAccount/AddAccount'
+import { useSelectionStore } from '../../Store/useSelectionStore'
+import axios from 'axios'
+import { useUserStore } from '../../Store/userSore'
 
-const swichs = [
-  { key: 'list', icon: <MenuIcon /> },
-  { key: 'dasboard', icon: <LayoutDashboardIcon /> },
-]
+const userApi = process.env.NEXT_PUBLIC_API_USER
 
 export default function ToolBar() {
   const [isOpen, setIsOpen] = useState<boolean>(false)
 
-  const handleOk = () => {}
+  const isDeletable = useSelectionStore((state) => state.isDeletable)
+  const selectedIds = useSelectionStore((state) => state.selectedIds)
+
+  const { fetchData } = useUserStore()
+
+  const { message } = App.useApp()
 
   const showModal = () => {
     setIsOpen(true)
   }
 
+  const handleDelete = async () => {
+    try {
+      var res = await axios.delete(`${userApi}`, {
+        data: selectedIds,
+      })
+      message.success('Xóa thành công')
+      fetchData()
+    } catch (error) {
+      message.error('Xóa thất bại')
+      console.log('Error: ', error)
+    }
+  }
+
   return (
     <div className={styles.toolBar}>
-      <Button danger disabled>
+      <Button danger disabled={!isDeletable} onClick={handleDelete}>
         <Trash2Icon />
         Xóa tài khoản
       </Button>
@@ -36,7 +48,7 @@ export default function ToolBar() {
         <CirclePlusIcon />
         Thêm tài khoản
       </Button>
-      <AddAccount open={isOpen} setopen={setIsOpen} onOk={handleOk} />
+      <AddAccount open={isOpen} setopen={setIsOpen} />
     </div>
   )
 }

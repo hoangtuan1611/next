@@ -10,6 +10,40 @@ import { useAuth } from '@/app/(auth)/AuthConfig/AuthContext'
 
 const scheduleApi = process.env.NEXT_PUBLIC_API_TEACHING_SCHEDULE
 
+export type ScheduleItem = {
+  subject: string
+  classCode: string
+  className: string
+  period: string
+  periodBegin: number
+  periodEnd: number
+  timeBegin: string
+  timeEnd: string
+  taughtLessons: string
+  room: string
+  content: string
+  subjectId: number
+  maxStudent: number
+}
+
+export type DaySchedule = {
+  morning: ScheduleItem[]
+  afternoon: ScheduleItem[]
+  evening: ScheduleItem[]
+}
+
+export type ScheduleData = {
+  metadata: {
+    weekNumber: number
+    startDate: string
+    endDate: string
+    professorName: string
+  }
+  schedule: {
+    [day: string]: DaySchedule
+  }
+}
+
 export default function Schedule() {
   const [open, setOpen] = useState<boolean>(false)
   const [selectedItem, setSelectedItem] = useState<TimeTableItem | undefined>()
@@ -32,7 +66,7 @@ export default function Schedule() {
     setOpen(true)
   }
 
-  const [data, setData] = useState({})
+  const [data, setData] = useState<ScheduleData>()
 
   const fetchData = async () => {
     const result = await axios.get(
@@ -46,10 +80,6 @@ export default function Schedule() {
   }, [])
 
   const { metadata, schedule } = data || {}
-
-  if (!data.schedule) {
-    return <p>Đang tải dữ liệu...</p>
-  }
 
   const timeMap = ['morning', 'afternoon', 'evening']
 
@@ -69,7 +99,7 @@ export default function Schedule() {
           </div>
           <h1 className="text-sm">
             Thời khoá biểu giảng viên:{' '}
-            <span className="font-medium">{metadata.professorName}</span>
+            <span className="font-medium">{data?.metadata.professorName}</span>
           </h1>
         </div>
 
@@ -94,7 +124,13 @@ export default function Schedule() {
             </thead>
             <tbody>
               {days.map((day, index) => {
-                const scheduleForDay = schedule[day as keyof typeof schedule]
+                const scheduleForDay = schedule?.[
+                  day as keyof typeof schedule
+                ] || {
+                  morning: [],
+                  afternoon: [],
+                  evening: [],
+                }
 
                 return (
                   <tr key={index}>

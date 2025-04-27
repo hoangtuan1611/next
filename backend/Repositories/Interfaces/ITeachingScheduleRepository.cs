@@ -6,5 +6,6 @@ namespace backend.Repositories.Interfaces
   {
     Task<List<TeachingSession>> GetSessionsByWeekAsync(int weekNum, string teacherCode);
     Task<TeachingWeek> GetTeachingWeekAsync(int weekNum, DateTime startDate, DateTime endDate, string teacherCode);
+    Task<Teacher> GetTeacherAsync(string teacherCode);
   }
 }

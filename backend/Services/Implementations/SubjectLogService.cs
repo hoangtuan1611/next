@@ -50,5 +50,12 @@ namespace backend.Services.Implementations
     {
       return await _repository.GetGroupedLogsAsync();
     }
+
+    public async Task<IEnumerable<SubjectLogDto>> GetGroupedLogsByRoom()
+    {
+      var result = await _repository.GetGroupedLogsByRoomAsync();
+      var dto = _mapper.Map<IEnumerable<SubjectLogDto>>(result);
+      return dto;
+    }
   }
 }

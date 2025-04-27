@@ -135,5 +135,11 @@ namespace backend.Repositories.Implementations
 
       return result;
     }
+
+    public async Task<IEnumerable<SubjectLog>> GetGroupedLogsByRoomAsync()
+    {
+      var result = await _context.SubjectLogs.ToListAsync();
+      return result;
+    }
   }
 }

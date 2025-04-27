@@ -16,11 +16,65 @@ namespace backend.Services.Implementations
       _mapper = mapper;
     }
 
+    // public async Task<WeeklyScheduleDto> GetWeeklyScheduleAsync(int weekNum, DateTime startDate, DateTime endDate, string teacherCode)
+    // {
+    //   var week = await _repository.GetTeachingWeekAsync(weekNum, startDate, endDate, teacherCode);
+    //   if (week == null) return null;
+    //   var sessions = await _repository.GetSessionsByWeekAsync(weekNum, teacherCode);
+
+    //   var schedule = new Dictionary<string, DayScheduleDto>();
+    //   string[] days = new[] { "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật" };
+    //   foreach (var day in days)
+    //   {
+    //     schedule[day] = new DayScheduleDto();
+    //   }
+
+    //   foreach (var session in sessions)
+    //   {
+    //     var dto = _mapper.Map<ScheduleItemDto>(session);
+    //     var day = session.DayOfWeek;
+    //     var timeOfDay = session.TimeOfDay.ToLower();
+    //     if (schedule.ContainsKey(day))
+    //     {
+    //       switch (timeOfDay)
+    //       {
+    //         case "buổi sáng": schedule[day].Morning.Add(dto); break;
+    //         case "buổi chiều": schedule[day].Afternoon.Add(dto); break;
+    //         case "buổi tối": schedule[day].Evening.Add(dto); break;
+    //       }
+    //     }
+    //   }
+
+    //   return new WeeklyScheduleDto
+    //   {
+    //     Metadata = new MetadataDto
+    //     {
+    //       WeekNumber = week.WeekNumber,
+    //       StartDate = week.StartDate.ToString("dd/MM/yyyy"),
+    //       EndDate = week.EndDate.ToString("dd/MM/yyyy"),
+    //       ProfessorName = week.Teacher?.TeacherName ?? string.Empty
+    //     },
+    //     Schedule = schedule
+    //   };
+    // }
+
     public async Task<WeeklyScheduleDto> GetWeeklyScheduleAsync(int weekNum, DateTime startDate, DateTime endDate, string teacherCode)
     {
-      var sessions = await _repository.GetSessionsByWeekAsync(weekNum, teacherCode);
       var week = await _repository.GetTeachingWeekAsync(weekNum, startDate, endDate, teacherCode);
-      if (week == null) return null;
+      var teacher = await _repository.GetTeacherAsync(teacherCode);
+      if (week == null) return new WeeklyScheduleDto
+      {
+        Metadata = new MetadataDto
+        {
+          WeekNumber = weekNum,
+          StartDate = startDate.ToString(),
+          EndDate = endDate.ToString(),
+          ProfessorName = teacher.TeacherName
+        },
+        Schedule = []
+      };
+
+      var sessions = await _repository.GetSessionsByWeekAsync(weekNum, teacherCode);
 
       var schedule = new Dictionary<string, DayScheduleDto>();
       string[] days = new[] { "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật" };
@@ -29,18 +83,28 @@ namespace backend.Services.Implementations
         schedule[day] = new DayScheduleDto();
       }
 
-      foreach (var session in sessions)
+      if (sessions != null && sessions.Count > 0)
       {
-        var dto = _mapper.Map<ScheduleItemDto>(session);
-        var day = session.DayOfWeek;
-        var timeOfDay = session.TimeOfDay.ToLower();
-        if (schedule.ContainsKey(day))
+        foreach (var session in sessions)
         {
-          switch (timeOfDay)
+          var dto = _mapper.Map<ScheduleItemDto>(session);
+          var day = session.DayOfWeek;
+          var timeOfDay = session.TimeOfDay.ToLower();
+
+          if (schedule.ContainsKey(day))
           {
-            case "buổi sáng": schedule[day].Morning.Add(dto); break;
-            case "buổi chiều": schedule[day].Afternoon.Add(dto); break;
-            case "buổi tối": schedule[day].Evening.Add(dto); break;
+            switch (timeOfDay)
+            {
+              case "buổi sáng":
+                schedule[day].Morning.Add(dto);
+                break;
+              case "buổi chiều":
+                schedule[day].Afternoon.Add(dto);
+                break;
+              case "buổi tối":
+                schedule[day].Evening.Add(dto);
+                break;
+            }
           }
         }
       }
@@ -57,5 +121,6 @@ namespace backend.Services.Implementations
         Schedule = schedule
       };
     }
+
   }
 }
