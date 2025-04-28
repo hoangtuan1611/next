@@ -49,7 +49,7 @@ Ví dụ server name có thể là:
 dotnet run
 ```
 
-- Backend mặc định chạy tại địa chỉ: `https://localhost:5001` (hoặc địa chỉ khác theo cấu hình).
+- Backend mặc định chạy tại địa chỉ: `https://localhost:5095` (hoặc địa chỉ khác theo cấu hình).
 
 ---
 
@@ -73,7 +73,7 @@ pnpm install
 pnpm dev
 ```
 
-- Frontend mặc định chạy tại địa chỉ: `http://localhost:5173`
+- Frontend mặc định chạy tại địa chỉ: `http://localhost:3000`
 
 ---
 
