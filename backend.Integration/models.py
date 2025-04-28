@@ -1,8 +1,13 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from urllib.parse import quote
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 
 db = SQLAlchemy()
+
+Base = declarative_base()
 
 class Camera(db.Model):
     __tablename__ = 'cameras'
@@ -78,4 +83,29 @@ class VideoRecord(db.Model):
             'duration': self.duration,
             'file_size': self.file_size,
             'created_at': self.created_at.isoformat() if self.created_at else None
-        } 
+        }
+
+class Teacher(Base):
+    __tablename__ = 'teachers'
+    
+    id = Column(String, primary_key=True)
+    name = Column(String, nullable=False)
+    schedules = relationship("Schedule", back_populates="teacher")
+
+class Schedule(Base):
+    __tablename__ = 'schedules'
+    
+    id = Column(Integer, primary_key=True)
+    teacher_id = Column(String, ForeignKey('teachers.id'))
+    week = Column(Integer, nullable=False)
+    day = Column(String, nullable=False)  # Thứ 2, Thứ 3, etc.
+    period = Column(String, nullable=False)  # morning, afternoon, evening
+    subject = Column(String)
+    class_code = Column(String)
+    class_name = Column(String)
+    taught_lessons = Column(String)
+    room = Column(String)
+    content = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    teacher = relationship("Teacher", back_populates="schedules") 

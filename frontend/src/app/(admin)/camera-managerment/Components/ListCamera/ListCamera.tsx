@@ -30,7 +30,7 @@ interface CameraFormData {
   description?: string
 }
 
-const API_BASE_URL = 'http://localhost:5000/api'
+const API_BASE_URL = 'http://localhost:5000'
 
 export default function ListCamera() {
   const [cameras, setCameras] = useState<Camera[]>([])
@@ -47,7 +47,7 @@ export default function ListCamera() {
 
   const fetchCameras = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/cameras`, {
+      const response = await fetch(`${API_BASE_URL}/api/cameras`, {
         headers: {
           'Accept': 'application/json'
         }

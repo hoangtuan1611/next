@@ -677,10 +677,16 @@ with app.app_context():
             name="Webcam",
             camera_id="cam0",
             ip_address="0",
-            description="Local webcam"
+            description="Local webcam",
+            is_active=True
         )
         db.session.add(default_webcam)
         db.session.commit()
+    else:
+        # Update existing webcam to be active
+        default_webcam.is_active = True
+        db.session.commit()
+        logger.info("Cập nhật trạng thái webcam mặc định thành active")
     
     # Thêm webcam mặc định nếu chưa có camera nào
     if "cam0" not in camera_objects:

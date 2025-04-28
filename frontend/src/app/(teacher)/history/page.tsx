@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 import { List, DatePicker, Input, Button } from 'antd'
 import { Search, Plus, Monitor } from 'lucide-react'
 import axios from 'axios'
-import LineChartCustom from '@/app/(components)/LineChartCustom'
+import LineChartCustom1 from '@/app/(components)/LinechartCustom1'
 import BarChartCustom from '@/app/(components)/BarChartCustom'
 import Image from 'next/image'
 import { useAuth } from '@/app/(auth)/AuthConfig/AuthContext'
@@ -163,7 +163,7 @@ export default function History() {
           <div className="mt-8">
             <h3 className="mb-4 text-lg font-semibold">Thống kê theo ngày</h3>
             <div className="mb-8 h-64">
-              <LineChartCustom data={logDate} />
+              <LineChartCustom1 data={logDate} />
             </div>
             <h3 className="mb-4 text-lg font-semibold">
               Thống kê điểm danh - {selectedClass?.className}

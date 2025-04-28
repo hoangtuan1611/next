@@ -45,7 +45,7 @@ const days = [
   'Thứ 7',
 ]
 
-const API_BASE_URL = 'http://localhost:5000/api'
+const API_BASE_URL = 'http://localhost:5000'
 
 export default function DashboardCamera() {
   const router = useRouter()
@@ -94,7 +94,7 @@ export default function DashboardCamera() {
 
   const fetchCameras = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/cameras`, {
+      const response = await fetch(`${API_BASE_URL}/api/cameras`, {
         headers: {
           'Accept': 'application/json'
         }

@@ -38,17 +38,17 @@ export default function ViewCamera({ params }: { params: Promise<{ cameraId: str
   useEffect(() => {
     const fetchActiveCameras = async () => {
       try {
-        const response = await fetch('http://localhost:5000/cameras')
+        const response = await fetch('http://localhost:5000/api/cameras')
         if (!response.ok) {
           throw new Error('Không thể kết nối đến server')
         }
         const data = await response.json()
-        if (data && Array.isArray(data.cameras)) {
-          const activeCams = data.cameras.filter((camera: Camera) => camera.is_active)
+        if (data && Array.isArray(data)) {
+          const activeCams = data.filter((camera: Camera) => camera.is_active)
           setActiveCameras(activeCams)
           
           const statusMap: { [key: string]: boolean } = {}
-          for (const camera of data.cameras) {
+          for (const camera of data) {
             try {
               const statusResponse = await fetch(`http://localhost:5000/student_count?camera_id=${camera.camera_id}`)
               const statusData = await statusResponse.json()

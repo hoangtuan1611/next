@@ -51,64 +51,82 @@ export default function Login() {
   }
 
   useEffect(() => {
-    const clearCookie = async () => {
-      try {
-        await axios.get(`${clearTokenApi}`, {
-          withCredentials: true,
-        })
-      } catch (error) {
-        console.error('Error clearing cookie:', error)
-      }
-    }
-    clearCookie()
+    axios.get(`${clearTokenApi}`, {
+      withCredentials: true,
+    })
     localStorage.clear()
   }, [])
 
   return (
-    <div className="flex min-h-screen">
-      <div className="flex-1 flex items-center justify-center">
-        <div className="w-full max-w-md p-8 space-y-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold">Đăng nhập</h2>
-          </div>
+    <div className="flex h-screen">
+      {/* Left side - Illustration */}
+      <div className="relative flex w-4/10 flex-col items-center justify-center bg-white p-8">
+        <Image
+          src="/bg-login.svg"
+          alt="Login Illustration"
+          fill
+          className="object-contain"
+          priority
+        />
+      </div>
+
+      {/* Right side - Login Form */}
+      <div className="flex w-6/10 flex-col justify-center bg-white p-8">
+        <div className="pr-[20%]">
+          <h2 className="mb-2 text-2xl font-bold text-gray-800">Đăng nhập</h2>
+          <p className="mb-8 text-gray-600">
+            Chào mừng bạn trở lại! Hãy nhập thông tin tài khoản để tiếp tục.
+          </p>
+
           <Form
             name="login"
             initialValues={{ remember: true }}
             onFinish={onFinish}
-            className="mt-8 space-y-6"
+            layout="vertical"
+            size="large"
           >
             <Form.Item
+              label="Tên đăng nhập"
               name="username"
-              rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập!' }]}
+              rules={[
+                { required: true, message: 'Vui lòng nhập tên đăng nhập!' },
+              ]}
             >
               <Input
-                prefix={<UserOutlined className="site-form-item-icon" />}
-                placeholder="Tên đăng nhập"
-                size="large"
+                prefix={<UserOutlined className="text-gray-400" />}
+                placeholder="Nhập tên đăng nhập"
               />
             </Form.Item>
 
             <Form.Item
+              label="Mật khẩu"
               name="password"
               rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
             >
               <Input.Password
-                prefix={<LockOutlined className="site-form-item-icon" />}
-                placeholder="Mật khẩu"
-                size="large"
+                prefix={<LockOutlined className="text-gray-400" />}
+                placeholder="Nhập mật khẩu"
                 iconRender={(visible) =>
                   visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
                 }
               />
             </Form.Item>
 
+            <div className="mb-6 flex items-center justify-between">
+              <a
+                className="text-sm text-gray-600 hover:text-green-600"
+                href="#"
+              >
+                Ghi nhớ mật khẩu
+              </a>
+            </div>
+
             <Form.Item>
               <Button
+                loading={loading}
                 type="primary"
                 htmlType="submit"
-                className="w-full"
-                size="large"
-                loading={loading}
+                className="h-12 w-full border-none bg-green-600 text-base font-medium hover:bg-green-700"
               >
                 Đăng nhập
               </Button>

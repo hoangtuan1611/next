@@ -1,42 +1,68 @@
 # app.py
-from flask import Flask, Response
-import cv2
-from ultralytics import YOLO
+import threading
+import subprocess
+import sys
+from datetime import datetime
+import time
 
-app = Flask(__name__)
+def run_webrtc():
+    try:
+        # Run webrtc.py as a subprocess
+        process = subprocess.Popen(['python', 'webrtc.py'],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        universal_newlines=True)
+        print(f"[{datetime.now()}] WebRTC service started")
+        
+        # Monitor the process
+        while True:
+            if process.poll() is not None:
+                print(f"[{datetime.now()}] WebRTC service stopped with return code: {process.returncode}")
+                break
+            time.sleep(1)
+            
+    except Exception as e:
+        print(f"[{datetime.now()}] Error starting WebRTC service: {e}")
 
-# Tải mô hình YOLOv8
-model = YOLO('yolov8n.pt')  # Sử dụng mô hình YOLOv8 nhỏ
+def run_schedule_fetcher():
+    try:
+        # Run schedule_fetcher.py as a subprocess
+        process = subprocess.Popen(['python', 'schedule_fetcher.py'],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        universal_newlines=True)
+        print(f"[{datetime.now()}] Schedule fetcher service started")
+        
+        # Monitor the process
+        while True:
+            if process.poll() is not None:
+                print(f"[{datetime.now()}] Schedule fetcher service stopped with return code: {process.returncode}")
+                break
+            time.sleep(1)
+            
+    except Exception as e:
+        print(f"[{datetime.now()}] Error starting Schedule fetcher service: {e}")
 
-def generate_frames():
-    camera = cv2.VideoCapture(0)  # Sử dụng camera mặc định
-    frame_count = 0
-    while True:
-        success, frame = camera.read()
-        if not success:
-            break
-        else:
-            frame_count += 1
-            if frame_count % 2 != 0:  # Chỉ xử lý mỗi khung hình thứ hai
-                continue
-            frame = cv2.resize(frame, (640, 480))
-            # Sử dụng YOLOv8 để phát hiện đối tượng
-            results = model(frame)
-            for result in results:
-                # Vẽ bounding box lên frame
-                for box in result.boxes:
-                    x1, y1, x2, y2 = map(int, box.xyxy[0])
-                    cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
-
-            # Chuyển đổi frame thành JPEG
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-@app.route('/video_feed')
-def video_feed():
-    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+if __name__ == '__main__':
+    try:
+        print(f"[{datetime.now()}] Starting services...")
+        
+        # Start both services in separate threads
+        webrtc_thread = threading.Thread(target=run_webrtc)
+        schedule_thread = threading.Thread(target=run_schedule_fetcher)
+        
+        webrtc_thread.start()
+        schedule_thread.start()
+        
+        print(f"[{datetime.now()}] Both services started. Press Ctrl+C to stop.")
+        
+        # Keep the main thread alive
+        webrtc_thread.join()
+        schedule_thread.join()
+        
+    except KeyboardInterrupt:
+        print(f"\n[{datetime.now()}] Shutting down services...")
+        sys.exit(0)
+    except Exception as e:
+        print(f"[{datetime.now()}] Error in main process: {e}")
+        sys.exit(1)

@@ -29,4 +29,11 @@
     width: 100%;
     cursor: pointer;
   }
+
+  &__logoutBtn {
+    color: var(--background);
+    &:hover {
+      color: var(--primary);
+    }
+  }
 }

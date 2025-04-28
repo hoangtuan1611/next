@@ -50,14 +50,14 @@ export default function ToolBar({
           </Button>
         ))}
       </div>
-      <Button danger disabled>
+      {/* <Button danger disabled>
         <Trash2Icon />
         Xóa Camera
       </Button>
       <Button type="primary" onClick={showModal}>
         <CirclePlusIcon />
         Thêm Camera
-      </Button>
+      </Button> */}
       <AddCamera open={isOpen} setopen={setIsOpen} onOk={handleOk} />
     </div>
   )
