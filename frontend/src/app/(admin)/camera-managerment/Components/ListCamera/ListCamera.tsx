@@ -1,9 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Button, Table, Space, message, Tag } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, PlayCircleOutlined, PauseCircleOutlined } from '@ant-design/icons'
-import AddCamera from '../AddCamera/AddCamera'
+import { Button, Table, Space, message, Tag, Modal, Form, Input, Radio } from 'antd'
+import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import styles from './ListCamera.module.scss'
 
 interface Camera {
@@ -20,6 +19,19 @@ interface Camera {
   url: string
 }
 
+interface CameraFormData {
+  name: string
+  type: 'webcam' | 'ip'
+  ip_address?: string
+  port?: string
+  username?: string
+  password?: string
+  stream_path?: string
+  description?: string
+}
+
+const API_BASE_URL = 'http://localhost:5000/api'
+
 export default function ListCamera() {
   const [cameras, setCameras] = useState<Camera[]>([])
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -27,97 +39,117 @@ export default function ListCamera() {
   const [selectedCamera, setSelectedCamera] = useState<Camera | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [activeStreams, setActiveStreams] = useState<{ [key: string]: boolean }>({})
+  const [form] = Form.useForm()
 
   useEffect(() => {
     fetchCameras()
-
-    // Set up polling every 5 seconds
-    const intervalId = setInterval(() => {
-      fetchCameras()
-    }, 5000)
-
-    // Cleanup interval on component unmount
-    return () => clearInterval(intervalId)
   }, [])
 
   const fetchCameras = async () => {
     try {
-      const response = await fetch('http://localhost:5000/cameras')
-      const data = await response.json()
+      const response = await fetch(`${API_BASE_URL}/cameras`, {
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
       
-      if (data && Array.isArray(data.cameras)) {
-        const validCameras = data.cameras.map((camera: Partial<Camera>) => ({
-          ...camera,
-          is_active: camera.is_active ?? false,
-          id: camera.id ?? camera.camera_id,
-          camera_id: camera.camera_id ?? camera.id?.toString(),
-          key: camera.id // Thêm key cho Table
-        }))
-        setCameras(validCameras)
-      } else {
-        console.error('Invalid camera data format:', data)
-        setCameras([])
+      if (!response.ok) {
+        throw new Error('Không thể lấy danh sách camera')
       }
+
+      const data = await response.json()
+      setCameras(data)
     } catch (error) {
       console.error('Error fetching cameras:', error)
+      message.error('Không thể kết nối đến server')
       setCameras([])
     }
   }
 
-  const handleAddCamera = async (formData: any) => {
+  const handleAddCamera = async (values: CameraFormData) => {
     setIsLoading(true)
     setError(null)
     try {
-      const response = await fetch('http://localhost:5000/cameras', {
+      // Prepare data based on camera type
+      const addData = {
+        ...values,
+        type: values.type || 'webcam',
+        ip_address: values.type === 'webcam' ? '0' : values.ip_address,
+        port: values.type === 'webcam' ? '' : values.port,
+        username: values.type === 'webcam' ? '' : values.username,
+        password: values.type === 'webcam' ? '' : values.password,
+        stream_path: values.type === 'webcam' ? '' : values.stream_path,
+        camera_id: values.type === 'webcam' ? 'cam0' : `cam${Date.now()}`
+      }
+
+      const response = await fetch(`${API_BASE_URL}/cameras`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(addData)
       })
-      const data = await response.json()
       
-      if (response.ok) {
-        message.success('Thêm camera thành công')
-        fetchCameras()
-        setIsAddModalOpen(false)
-      } else {
-        setError(data.error || 'Không thể thêm camera')
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Không thể thêm camera')
       }
+
+      const data = await response.json()
+      message.success('Thêm camera thành công')
+      fetchCameras()
+      setIsAddModalOpen(false)
+      form.resetFields()
     } catch (error) {
       console.error('Error adding camera:', error)
-      setError('Không thể kết nối đến server')
+      message.error(error instanceof Error ? error.message : 'Không thể kết nối đến server')
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleEditCamera = async (formData: any) => {
+  const handleEditCamera = async (values: CameraFormData) => {
     if (!selectedCamera) return
     setIsLoading(true)
     setError(null)
     try {
-      const response = await fetch(`http://localhost:5000/cameras/${selectedCamera.id}`, {
+      // Prepare data based on camera type
+      const updateData = {
+        ...values,
+        type: values.type || 'webcam',
+        ip_address: values.type === 'webcam' ? '0' : values.ip_address,
+        port: values.type === 'webcam' ? '' : values.port,
+        username: values.type === 'webcam' ? '' : values.username,
+        password: values.type === 'webcam' ? '' : values.password,
+        stream_path: values.type === 'webcam' ? '' : values.stream_path,
+        camera_id: selectedCamera.camera_id // Giữ nguyên camera_id
+      }
+
+      // Sử dụng id thay vì camera_id trong URL
+      const response = await fetch(`${API_BASE_URL}/cameras/${selectedCamera.id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(updateData)
       })
-      const data = await response.json()
       
-      if (response.ok) {
-        message.success('Cập nhật camera thành công')
-        fetchCameras()
-        setIsEditModalOpen(false)
-        setSelectedCamera(null)
-      } else {
-        setError(data.error || 'Không thể cập nhật camera')
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Không thể cập nhật camera')
       }
+
+      const data = await response.json()
+      message.success('Cập nhật camera thành công')
+      fetchCameras()
+      setIsEditModalOpen(false)
+      setSelectedCamera(null)
+      form.resetFields()
     } catch (error) {
       console.error('Error updating camera:', error)
-      setError('Không thể kết nối đến server')
+      message.error(error instanceof Error ? error.message : 'Không thể kết nối đến server')
     } finally {
       setIsLoading(false)
     }
@@ -127,29 +159,47 @@ export default function ListCamera() {
     if (!window.confirm('Bạn có chắc muốn xóa camera này?')) return
     setIsLoading(true)
     try {
-      const response = await fetch(`http://localhost:5000/cameras/${id}`, {
-        method: 'DELETE'
+      // Sử dụng id thay vì camera_id trong URL
+      const response = await fetch(`${API_BASE_URL}/cameras/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Accept': 'application/json'
+        }
       })
-      if (response.ok) {
-        message.success('Xóa camera thành công')
-        fetchCameras()
-      } else {
-        const data = await response.json()
-        message.error(data.error || 'Không thể xóa camera')
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Không thể xóa camera')
       }
+
+      message.success('Xóa camera thành công')
+      fetchCameras()
     } catch (error) {
       console.error('Error deleting camera:', error)
-      message.error('Không thể kết nối đến server')
+      message.error(error instanceof Error ? error.message : 'Không thể kết nối đến server')
     } finally {
       setIsLoading(false)
     }
   }
 
-  const toggleStream = (cameraId: string) => {
-    setActiveStreams(prev => ({
-      ...prev,
-      [cameraId]: !prev[cameraId]
-    }))
+  const showAddModal = () => {
+    setIsAddModalOpen(true)
+    form.resetFields()
+  }
+
+  const showEditModal = (camera: Camera) => {
+    setSelectedCamera(camera)
+    form.setFieldsValue({
+      name: camera.name,
+      type: camera.ip_address === '0' ? 'webcam' : 'ip',
+      ip_address: camera.ip_address,
+      port: camera.port,
+      username: camera.username,
+      password: camera.password,
+      stream_path: camera.stream_path,
+      description: camera.description
+    })
+    setIsEditModalOpen(true)
   }
 
   const columns = [
@@ -162,6 +212,11 @@ export default function ListCamera() {
       title: 'IP',
       dataIndex: 'ip_address',
       key: 'ip_address',
+    },
+    {
+      title: 'Port',
+      dataIndex: 'port',
+      key: 'port',
     },
     {
       title: 'Trạng thái',
@@ -180,10 +235,7 @@ export default function ListCamera() {
           <Button
             type="text"
             icon={<EditOutlined />}
-            onClick={() => {
-              setSelectedCamera(record)
-              setIsEditModalOpen(true)
-            }}
+            onClick={() => showEditModal(record)}
             disabled={isLoading}
           />
           <Button
@@ -193,67 +245,196 @@ export default function ListCamera() {
             onClick={() => handleDeleteCamera(record.id)}
             disabled={isLoading}
           />
-          {record.is_active && (
-            <Button
-              type={activeStreams[record.camera_id] ? 'primary' : 'default'}
-              icon={activeStreams[record.camera_id] ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
-              onClick={() => toggleStream(record.camera_id)}
-              disabled={isLoading}
-            >
-              {activeStreams[record.camera_id] ? 'Dừng' : 'Xem'}
-            </Button>
-          )}
         </Space>
       ),
     },
   ]
 
+  const CameraForm = ({ form, onFinish, loading, isEdit = false }: { 
+    form: any, 
+    onFinish: (values: CameraFormData) => void,
+    loading: boolean,
+    isEdit?: boolean 
+  }) => {
+    const [cameraType, setCameraType] = useState<'webcam' | 'ip'>('webcam')
+
+    const handleTypeChange = (e: any) => {
+      const newType = e.target.value
+      setCameraType(newType)
+      
+      if (newType === 'webcam') {
+        // Set default values for webcam
+        form.setFieldsValue({
+          ip_address: '0',
+          port: '',
+          username: '',
+          password: '',
+          stream_path: ''
+        })
+      } else {
+        // Clear values when switching to IP camera
+        form.setFieldsValue({
+          ip_address: '',
+          port: '',
+          username: '',
+          password: '',
+          stream_path: ''
+        })
+      }
+    }
+
+    return (
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={onFinish}
+      >
+        <Form.Item
+          name="name"
+          label="Tên camera"
+          rules={[{ required: true, message: 'Vui lòng nhập tên camera' }]}
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          name="type"
+          label="Loại camera"
+          initialValue="webcam"
+        >
+          <Radio.Group onChange={handleTypeChange}>
+            <Radio value="webcam">Webcam</Radio>
+            <Radio value="ip">IP Camera</Radio>
+          </Radio.Group>
+        </Form.Item>
+
+        {cameraType === 'ip' ? (
+          <>
+            <Form.Item
+              name="ip_address"
+              label="IP"
+              rules={[{ required: true, message: 'Vui lòng nhập IP' }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="port"
+              label="Port"
+              rules={[{ required: true, message: 'Vui lòng nhập port' }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="username"
+              label="Username"
+              rules={[{ required: true, message: 'Vui lòng nhập username' }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="password"
+              label="Password"
+              rules={[{ required: true, message: 'Vui lòng nhập password' }]}
+            >
+              <Input.Password />
+            </Form.Item>
+            <Form.Item
+              name="stream_path"
+              label="Stream Path"
+              rules={[{ required: true, message: 'Vui lòng nhập stream path' }]}
+            >
+              <Input />
+            </Form.Item>
+          </>
+        ) : (
+          <Form.Item
+            name="ip_address"
+            hidden
+            initialValue="0"
+          >
+            <Input />
+          </Form.Item>
+        )}
+
+        <Form.Item
+          name="description"
+          label="Mô tả"
+        >
+          <Input.TextArea />
+        </Form.Item>
+
+        <Form.Item>
+          <Space>
+            <Button type="primary" htmlType="submit" loading={loading}>
+              {isEdit ? 'Cập nhật' : 'Thêm'}
+            </Button>
+            <Button onClick={() => {
+              if (isEdit) {
+                setIsEditModalOpen(false)
+                setSelectedCamera(null)
+              } else {
+                setIsAddModalOpen(false)
+              }
+            }}>
+              Hủy
+            </Button>
+          </Space>
+        </Form.Item>
+      </Form>
+    )
+  }
+
   return (
-    <div className={styles.tableContainer}>
-     
+    <div className={styles.container}>
+      <div className={styles.container__header}>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={showAddModal}
+          disabled={isLoading}
+        >
+          Thêm Camera
+        </Button>
+      </div>
 
       <Table
         columns={columns}
         dataSource={cameras}
-        scroll={{ y: 'auto' }}
-        pagination={{ pageSize: 8, position: ['bottomLeft'] }}
+        loading={isLoading}
+        rowKey="id"
       />
 
-      {/* Video streams */}
-      <div className="grid grid-cols-2 gap-4 mt-4">
-        {cameras.map(camera => (
-          activeStreams[camera.camera_id] && camera.is_active && (
-            <div key={camera.id} className="relative pt-[56.25%]">
-              <div className="absolute top-0 left-0 w-full bg-gray-800 text-white p-2">
-                {camera.name}
-              </div>
-              <img
-                src={`http://localhost:5000/video_feed/${camera.camera_id}`}
-                alt={`Camera stream ${camera.name}`}
-                className="absolute top-0 left-0 w-full h-full object-cover"
-              />
-            </div>
-          )
-        ))}
-      </div>
-
-      <AddCamera
+      {/* Add Camera Modal */}
+      <Modal
+        title="Thêm Camera"
         open={isAddModalOpen}
-        setopen={setIsAddModalOpen}
-        onOk={handleAddCamera}
-        isLoading={isLoading}
-        error={error}
-      />
-
-      {selectedCamera && (
-        <AddCamera
-          open={isEditModalOpen}
-          setopen={setIsEditModalOpen}
-          onOk={handleEditCamera}
-          isLoading={isLoading}
-          error={error}
+        onCancel={() => setIsAddModalOpen(false)}
+        footer={null}
+      >
+        <CameraForm 
+          form={form}
+          onFinish={handleAddCamera}
+          loading={isLoading}
         />
-      )}
+      </Modal>
+
+      {/* Edit Camera Modal */}
+      <Modal
+        title="Sửa Camera"
+        open={isEditModalOpen}
+        onCancel={() => {
+          setIsEditModalOpen(false)
+          setSelectedCamera(null)
+        }}
+        footer={null}
+      >
+        <CameraForm 
+          form={form}
+          onFinish={handleEditCamera}
+          loading={isLoading}
+          isEdit={true}
+        />
+      </Modal>
     </div>
   )
 }

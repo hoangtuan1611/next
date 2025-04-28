@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Layout } from 'antd'
 import axios from 'axios'
 import UpdateClass from '@teacher/schedule/UpdateClass'
-import { TimeTableItem } from '@teacher/schedule/types'
+import { TimeTableItem } from './types'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 export default function Schedule() {
@@ -14,6 +14,8 @@ export default function Schedule() {
   const [timeTable, setTimeTable] = useState<TimeTableItem[]>([])
   const [open, setOpen] = useState<boolean>(false)
   const [selectedItem, setSelectedItem] = useState<TimeTableItem | undefined>()
+  const [selectedTeacher, setSelectedTeacher] = useState<string>('all')
+  const [allSchedules, setAllSchedules] = useState<any[]>([])
 
   const days = [
     'Thứ 2',
@@ -25,7 +27,7 @@ export default function Schedule() {
     'Chủ nhật',
   ]
 
-  const timeTableApi = process.env.NEXT_PUBLIC_API_TIMETABLE
+  const timeTableApi = 'http://localhost:5095/api/TeachingSchedule'
   const teacherCode =
     typeof window !== 'undefined'
       ? (localStorage.getItem('TeacherCode') ?? '000.000.00000')
@@ -45,29 +47,161 @@ export default function Schedule() {
 
   const fetchData = async () => {
     try {
-      const result = await axios.get(`${timeTableApi}/${teacherCode}`)
-      if (result.data && result.data.length > 1) {
-        setStartDate(formatDate(result.data[0].schedule.startDay))
-        setEndDate(formatDate(result.data[0].schedule.endDay))
-        setWeekNum(result.data[0].schedule.weekNum)
-        setTimeTable(result.data)
+      // Get the current date
+      const currentDate = new Date()
+      
+      // Calculate the week number based on the database's week numbers (8 and 9)
+      // If weekNum is 0, use week 8, if 1 use week 9
+      const dbWeekNum = weekNum === 0 ? 8 : 9
+      
+      // Set the dates based on the database's date ranges
+      const startDate = new Date(weekNum === 0 ? '2024-12-30' : '2025-01-06')
+      const endDate = new Date(weekNum === 0 ? '2025-01-05' : '2025-01-12')
+
+      console.log('Fetching data with params:', {
+        weekNum: dbWeekNum,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        selectedTeacher
+      })
+
+      let result
+      if (selectedTeacher === 'all') {
+        result = await axios.get(
+          `${timeTableApi}/all/${dbWeekNum}?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`
+        )
+        console.log('All teachers schedule result:', result.data)
+        if (result.data) {
+          setAllSchedules(result.data)
+          const allTimeTableItems = result.data.flatMap((schedule: any) => {
+            console.log('Processing schedule:', schedule)
+            return convertScheduleToTimeTableItems(schedule)
+          })
+          console.log('Converted time table items:', allTimeTableItems)
+          setTimeTable(allTimeTableItems)
+          if (result.data.length > 0) {
+            setStartDate(formatDate(result.data[0].metadata.startDate))
+            setEndDate(formatDate(result.data[0].metadata.endDate))
+            setWeekNum(result.data[0].metadata.weekNumber - 8) // Convert DB week number to UI week number
+          }
+        }
       } else {
-        console.log('Fail')
-        setTimeTable([])
+        result = await axios.get(
+          `${timeTableApi}/${dbWeekNum}?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}&teacherCode=${selectedTeacher}`
+        )
+        console.log('Single teacher schedule result:', result.data)
+        if (result.data) {
+          const scheduleData = result.data
+          setStartDate(formatDate(scheduleData.metadata.startDate))
+          setEndDate(formatDate(scheduleData.metadata.endDate))
+          setWeekNum(scheduleData.metadata.weekNumber - 8) // Convert DB week number to UI week number
+          const timeTableItems = convertScheduleToTimeTableItems(scheduleData)
+          console.log('Converted time table items:', timeTableItems)
+          setTimeTable(timeTableItems)
+        }
       }
     } catch (error) {
-      console.log('Fail to load data')
+      console.error('Error fetching data:', error)
       setTimeTable([])
     }
   }
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [weekNum, selectedTeacher])
 
   const handleCellClick = (item: TimeTableItem) => {
     setSelectedItem(item)
     setOpen(true)
+  }
+
+  const convertScheduleToTimeTableItems = (scheduleData: any) => {
+    console.log('Converting schedule data:', scheduleData)
+    const timeTableItems: TimeTableItem[] = []
+    if (!scheduleData.schedule) {
+      console.log('No schedule data found')
+      return timeTableItems
+    }
+
+    // Log the actual structure of schedule data
+    console.log('Schedule data structure:', JSON.stringify(scheduleData.schedule, null, 2))
+
+    // Initialize schedule for each day
+    const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật']
+    days.forEach((day, index) => {
+      const dayIndex = index + 2 // Convert to dayOfWeek (2-8)
+      const daySchedule = scheduleData.schedule[day] || { morning: [], afternoon: [], evening: [] }
+      
+      console.log(`Processing ${day}:`, daySchedule)
+
+      // Process morning sessions
+      const morningItems = (daySchedule.morning || []).map((item: any) => ({
+        dayOfWeek: dayIndex,
+        timeOfDay: 0,
+        subject: { subjectName: item.subject },
+        schedule: {
+          classId: item.classCode,
+          className: item.className,
+          maxStudents: item.maxStudent,
+          startDay: scheduleData.metadata.startDate,
+          endDay: scheduleData.metadata.endDate,
+          weekNum: scheduleData.metadata.weekNumber
+        },
+        periodBegin: item.periodBegin,
+        periodEnd: item.periodEnd,
+        room: item.room,
+        teacherName: scheduleData.metadata.professorName
+      }))
+
+      // Process afternoon sessions
+      const afternoonItems = (daySchedule.afternoon || []).map((item: any) => ({
+        dayOfWeek: dayIndex,
+        timeOfDay: 1,
+        subject: { subjectName: item.subject },
+        schedule: {
+          classId: item.classCode,
+          className: item.className,
+          maxStudents: item.maxStudent,
+          startDay: scheduleData.metadata.startDate,
+          endDay: scheduleData.metadata.endDate,
+          weekNum: scheduleData.metadata.weekNumber
+        },
+        periodBegin: item.periodBegin,
+        periodEnd: item.periodEnd,
+        room: item.room,
+        teacherName: scheduleData.metadata.professorName
+      }))
+
+      // Process evening sessions
+      const eveningItems = (daySchedule.evening || []).map((item: any) => ({
+        dayOfWeek: dayIndex,
+        timeOfDay: 2,
+        subject: { subjectName: item.subject },
+        schedule: {
+          classId: item.classCode,
+          className: item.className,
+          maxStudents: item.maxStudent,
+          startDay: scheduleData.metadata.startDate,
+          endDay: scheduleData.metadata.endDate,
+          weekNum: scheduleData.metadata.weekNumber
+        },
+        periodBegin: item.periodBegin,
+        periodEnd: item.periodEnd,
+        room: item.room,
+        teacherName: scheduleData.metadata.professorName
+      }))
+
+      console.log(`${day} items:`, {
+        morning: morningItems,
+        afternoon: afternoonItems,
+        evening: eveningItems
+      })
+
+      timeTableItems.push(...morningItems, ...afternoonItems, ...eveningItems)
+    })
+
+    console.log('Final converted time table items:', timeTableItems)
+    return timeTableItems
   }
 
   return (
@@ -76,18 +210,34 @@ export default function Schedule() {
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 px-4 py-2">
           <div className="flex items-center gap-2">
-            <button className="rounded p-1 text-gray-600 hover:bg-gray-50">
+            <button 
+              className="rounded p-1 text-gray-600 hover:bg-gray-50"
+              onClick={() => setWeekNum(prev => prev - 1)}
+            >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="text-sm">Tuần này</span>
-            <button className="rounded p-1 text-gray-600 hover:bg-gray-50">
+            <span className="text-sm">Tuần {weekNum}</span>
+            <button 
+              className="rounded p-1 text-gray-600 hover:bg-gray-50"
+              onClick={() => setWeekNum(prev => prev + 1)}
+            >
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
-          <h1 className="text-sm">
-            Thời khoá biểu giảng viên:{' '}
-            <span className="font-medium">{teacherName}</span>
-          </h1>
+          <div className="flex items-center gap-4">
+            <select 
+              className="rounded border border-gray-200 px-2 py-1 text-sm"
+              value={selectedTeacher}
+              onChange={(e) => setSelectedTeacher(e.target.value)}
+            >
+              <option value="all">Tất cả giáo viên</option>
+              <option value={teacherCode}>{teacherName}</option>
+            </select>
+            <h1 className="text-sm">
+              Thời khoá biểu giảng viên:{' '}
+              <span className="font-medium">{teacherName}</span>
+            </h1>
+          </div>
         </div>
 
         {/* Schedule Table */}
@@ -154,6 +304,9 @@ export default function Schedule() {
                                   </p>
                                   <p className="text-xs text-gray-500">
                                     - Phòng: {item.room}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    - Giáo viên: {item.teacherName}
                                   </p>
                                 </div>
                               ))

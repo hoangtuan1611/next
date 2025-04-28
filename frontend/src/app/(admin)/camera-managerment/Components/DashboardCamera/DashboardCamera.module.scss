@@ -1,42 +1,101 @@
 .container {
-  margin: 1rem;
+  padding: 20px;
+
+  &__header {
+    margin-bottom: 20px;
+    
+    h2 {
+      font-size: 18px;
+      font-weight: 500;
+      color: #333;
+    }
+  }
 
   &__layout {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
 
     &__item {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
       &__camera {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 130px;
-        width: 100%;
-        background-color: var(--foreground);
-        border-radius: 0.4rem;
+        margin-bottom: 12px;
       }
 
       &__info {
-        padding: 0.5rem;
+        &__name {
+          font-size: 16px;
+          font-weight: 500;
+          margin-bottom: 8px;
+        }
 
         &__state {
-          width: fit-content;
-          margin-top: 0.5rem;
-          padding: 0.2rem 1rem;
-          border-radius: 1rem;
-          color: var(--background);
+          display: inline-block;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 12px;
+          margin-bottom: 12px;
+
+          &--online {
+            background-color: #f6ffed;
+            color: #52c41a;
+            border: 1px solid #b7eb8f;
+          }
+
+          &--offline {
+            background-color: #fff2f0;
+            color: #ff4d4f;
+            border: 1px solid #ffccc7;
+          }
         }
 
-        &--online {
-          background-color: var(--green-600);
-        }
+        &__class {
+          background-color: #f5f5f5;
+          padding: 12px;
+          border-radius: 4px;
+          margin-top: 8px;
 
-        &--offline {
-          background-color: var(--red-500);
+          &__name {
+            font-weight: 500;
+            margin-bottom: 4px;
+          }
+
+          &__subject {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 4px;
+          }
+
+          &__teacher {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 4px;
+          }
+
+          &__students {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 4px;
+          }
+
+          &__time {
+            color: #666;
+            font-size: 14px;
+          }
+
+          &__noClass {
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            padding: 8px;
+            background-color: #fafafa;
+            border-radius: 4px;
+            border: 1px dashed #d9d9d9;
+          }
         }
       }
     }

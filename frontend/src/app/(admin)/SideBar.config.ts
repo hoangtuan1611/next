@@ -52,10 +52,10 @@ export const items: Item[] = [
     icon: React.createElement(PieChartOutlined),
     path: getPath('/statistical-managerment'),
   }),
-  getItem({
-    label: 'Cấu hình',
-    key: '5',
-    icon: React.createElement(SettingOutlined),
-    path: getPath('/'),
-  }),
+  // getItem({
+  //   label: 'Cấu hình',
+  //   key: '5',
+  //   icon: React.createElement(SettingOutlined),
+  //   path: getPath('/'),
+  // }),
 ]

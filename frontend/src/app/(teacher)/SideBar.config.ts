@@ -35,7 +35,7 @@ export const items: Item[] = [
     'Camera',
     '2',
     React.createElement(VideoCameraOutlined),
-    getPath('/')
+    getPath('/home')
   ),
   getItem(
     'Lịch biểu',

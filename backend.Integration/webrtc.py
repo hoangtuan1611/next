@@ -19,7 +19,17 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "http://localhost:5173"]}})
+
+# Cấu hình CORS chi tiết hơn
+CORS(app, resources={
+    r"/*": {
+        "origins": ["http://localhost:3000", "http://localhost:5173"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization", "Accept"],
+        "supports_credentials": True,
+        "max_age": 3600
+    }
+})
 
 # Cấu hình Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cameras.db'
@@ -185,17 +195,22 @@ class YOLOv8VideoStream:
                 # Count persons in the frame
                 for result in results:
                     for box in result.boxes:
-                        if result.names[int(box.cls[0])] == 'person':
+                        if int(box.cls[0]) == 0:  # Chỉ xử lý class 0
                             self.person_count += 1
+                            x1, y1, x2, y2 = map(int, box.xyxy[0])
+                            conf = round(float(box.conf[0]), 2)
+                            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)  # Màu xanh lá cho class 0
+                            cv2.putText(frame, f"student: {conf}", (x1, y1 - 10),
+                                      cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
                 # Update student count
                 student_counts[self.camera_id] = self.person_count
 
                 # Draw results on frame
-                annotated_frame = results[0].plot()
+                annotated_frame = frame  # Sử dụng frame đã được vẽ thay vì results[0].plot()
                 
                 # Add student count text
-                cv2.putText(annotated_frame, f"Students: {self.person_count}", 
+                cv2.putText(annotated_frame, f"Students Count: {self.person_count}", 
                           (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
                 # Clear queue before putting new frame
@@ -399,7 +414,7 @@ def update_camera(camera_id):
         
         # Cập nhật các trường có thể thay đổi
         updatable_fields = ['name', 'ip_address', 'port', 'username', 'password', 
-                          'stream_path', 'description', 'is_active']
+                          'stream_path', 'description', 'is_active', 'camera_id']
         
         for field in updatable_fields:
             if field in data:
@@ -427,6 +442,14 @@ def delete_camera(camera_id):
         update_camera_urls()
         
         return jsonify({'message': 'Camera deleted successfully'})
+
+@app.route('/api/cameras/by-camera-id/<camera_id>', methods=['GET'])
+def get_camera_by_camera_id(camera_id):
+    with app.app_context():
+        camera = Camera.query.filter_by(camera_id=camera_id).first()
+        if not camera:
+            return jsonify({'error': 'Camera not found'}), 404
+        return jsonify(camera.to_dict())
 
 @app.route('/troubleshoot')
 def troubleshoot():

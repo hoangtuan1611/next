@@ -17,10 +17,7 @@ else:
 
 # Configuration for video source
 USE_IP_CAMERA = True
-# IP_CAMERA_URL = "rtsp://administrator:admin123@192.168.1.6:554/stream1"
 IP_CAMERA_URL = "rtsp://admin:Drg@2024@$@192.168.40.100:554/Streaming/Channels/101/"
-# Tải mô hình YOLOv8
-
 
 current_count_class_0 = 0
 def process_frame(frame):
@@ -28,12 +25,18 @@ def process_frame(frame):
     frame = cv2.resize(frame, (640, 480))
     results = model(frame)
     count_class_0 = 0
+    
+    # Chỉ vẽ và đếm class 0
     for result in results:
         for box in result.boxes:
-            if box.cls == 0:  # Kiểm tra nếu class là 0
+            if int(box.cls[0]) == 0:  # Chỉ xử lý class 0
                 count_class_0 += 1
-            x1, y1, x2, y2 = map(int, box.xyxy[0])
-            cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
+                x1, y1, x2, y2 = map(int, box.xyxy[0])
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)  # Màu xanh lá cho class 0
+                conf = round(float(box.conf[0]), 2)
+                cv2.putText(frame, f"Class 0: {conf}", (x1, y1 - 10),
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+    
     current_count_class_0 = count_class_0  # Cập nhật biến toàn cục
     return frame
 
@@ -52,7 +55,7 @@ def generate_frames():
                 break
             else:
                 frame_count += 1
-                if frame_count % 3 != 0:  # Chỉ xử lý mỗi khung hình thứ hai
+                if frame_count % 3 != 0:  # Chỉ xử lý mỗi khung hình thứ ba
                     continue
 
                 # Xử lý khung hình trong một luồng riêng biệt
@@ -60,7 +63,7 @@ def generate_frames():
                 processed_frame = future.result()
 
                 # Vẽ số lượng class 0 lên khung hình
-                cv2.putText(processed_frame, f'Count: {current_count_class_0}', (10, 30),
+                cv2.putText(processed_frame, f'Class 0 Count: {current_count_class_0}', (10, 30),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
                 ret, buffer = cv2.imencode('.jpg', processed_frame)
@@ -70,12 +73,12 @@ def generate_frames():
 
 @app.route('/video_feed')
 def video_feed():
-    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(generate_frames(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/student_count')
-def student_count():
-    # Trả về số lượng class 0 dưới dạng JSON
+@app.route('/get_count')
+def get_count():
     return jsonify({'count': current_count_class_0})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
